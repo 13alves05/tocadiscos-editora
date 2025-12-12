@@ -1,5 +1,5 @@
 from csv import DictReader
-from random import randint
+from dataFormat import feedAlbums, updateAlbums, feedAuthors, updateAuthors
 
 ## MAKING DIFFERENT TABLES ##
 authorsData = []
@@ -9,38 +9,68 @@ authorsDict = {}
 albumsDict = {}
 
 tracksUsableFile = open('data/raw_tracks.csv', 'r', encoding='utf-8-sig' )
-tracksUsableData = list(DictReader(tracksUsableFile.readlines())) # transforma cada linha numa lista
+tracksUsableData = list(DictReader(tracksUsableFile.readlines())) # transforma cada line numa lista
 tracksUsableFile.close()
 
 
 ## organize data into authors and albums tables
 
-for linha in tracksUsableData[1:4]:    
+for line in tracksUsableData[1:]:
 
-    ##adicionar nova entrada em autor e albums se não existir
-    if len(authorsDict) == 0 and len(albumsDict) == 0 or len(authorsDict) > 0 and len(albumsDict) > 0 and linha['artist_id'] not in authorsDict.get() and linha['album_id'] not in albumsDict.get():
+    emptyCount = 0
 
-        authorsDict[linha['artist_id']] = {
-            'artist_name' : linha['artist_name'],
-            'artist_nacionality' :linha['artist_nacionality'],
-            'album_title': [linha['album_title']],
-            'rights_percentage' : randint(30, 50),
-            'total_earned' : linha['track_price']
-        }
+    for item in line.values():
+        if item == '':
+            emptyCount += 1
 
-        albumsDict[linha['album_id']] = {
-            'album_title': linha['album_title'],
-            'artist_name': linha['artist_name'],
-            'album_genere': linha['track_genres'],
-            'album_date': linha['track_date_recorded'],
-            'unites_sold': linha['track_interest'],
-            'album_price': linha['track_price'],
-            'tracks': [(linha['track_id'],linha['track_title'])],
-            
-        }
-        
-#     else:
+    if emptyCount > 0:
+        print(line)
+        continue
 
+
+    # Inicializar o dicionário
+    if len(authorsDict) == 0 and len(albumsDict) == 0:
+        feedAuthors(authorsDict, line)
+        feedAlbums(albumsDict, line) 
+        print(authorsDict)
+
+    # Adicionar novas entradas OU atualizar entradas existentes
+    if len(authorsDict) > 0 and len(albumsDict) > 0:
+
+        # Authors
+        # Adicionar novo Autor
+        if  int(line['artist_id']) not in authorsDict:
+            try:
+                feedAuthors(authorsDict, line)
+            except:
+                continue
+
+        # Adicionar dados a autor já existente
+        elif int(line['artist_id'])  in authorsDict:
+            try:
+                updateAuthors(authorsDict, line)
+            except:
+                continue
+
+
+        # Albums
+        # Adicionar novo album
+        if int(line['album_id']) not in albumsDict:
+            try:
+                feedAlbums(albumsDict, line)
+            except:
+                continue
+
+
+        # Adicionar dados a a album já existente
+        elif int(line['album_id']) not in albumsDict:
+            try:
+                updateAlbums(albumsDict)
+            except:
+                continue
+
+
+print(authorsDict)
 
 # print(albumsDict)
 # print(authorsDict)

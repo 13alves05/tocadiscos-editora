@@ -42,6 +42,7 @@ tracksRaw = open('data/raw_tracks.csv', 'r', encoding='utf-8-sig' )
 tracksRawData = tracksRaw.readlines()
 tracksRaw.close()
 
+print(tracksRawData[1:5])
 
 cleanRawData = []
 
@@ -73,8 +74,8 @@ for line in tracksRawData[1:]:
         cleanRawData.append(','.join(line))
 
 ## override clean data to raw_tracks
-tracksRaw = open('data/raw_tracks.csv', 'w', encoding='utf-8-sig' )
-tracksRaw.writelines(cleanRawData)
-tracksRaw.close()
+# tracksRaw = open('data/raw_tracks.csv', 'w', encoding='utf-8-sig' )
+# tracksRaw.writelines(cleanRawData)
+# tracksRaw.close()
 
 ## ----FIM---- CLEAN DATA ##
