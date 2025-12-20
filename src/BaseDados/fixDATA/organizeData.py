@@ -72,7 +72,9 @@ authorsData = []
 albumsData = []
 
 authorsColumns = list(authorsDict[1].keys())
+authorsColumns.insert(0, 'author_id')
 albumsColumns = list(albumsDict[1].keys())
+albumsColumns.insert(0, 'album_id')
 
 def dict_2_array (dicionario, lista):
     for index in dicionario:
@@ -80,6 +82,7 @@ def dict_2_array (dicionario, lista):
 
         for val in range(0,len(entry)):
             entry[val] = str(entry[val])
+        entry.insert(0, str(index))
         entry = ','.join(entry) + '\n'
 
         lista.append(entry)

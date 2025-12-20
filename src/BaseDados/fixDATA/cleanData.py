@@ -42,11 +42,9 @@ tracksRaw = open('data/raw_tracks.csv', 'r', encoding='utf-8-sig' )
 tracksRawData = tracksRaw.readlines()
 tracksRaw.close()
 
-print(tracksRawData[1:5])
-
 cleanRawData = []
 
-campos = tracksRawData[0].replace('\n','').split(';')
+campos = tracksRawData[0].replace('\n','').split(',')
 campos.append('artist_nacionality')
 campos.append('track_price\n')
 cleanRawData.append(','.join(campos))
@@ -55,7 +53,13 @@ cleanRawData.append(','.join(campos))
 indexOfGenre = campos.index('track_genres')
 
 for line in tracksRawData[1:]: 
-    line = line.replace('\n','').split(';')
+
+    try:
+        int(line[0])
+    except:
+        continue
+
+    line = line.replace('\n','').split(',')
     line.append(atribuir_nacionalidade())
     line.append(str(atribuir_preco_track()) + '\n')
 
@@ -74,8 +78,8 @@ for line in tracksRawData[1:]:
         cleanRawData.append(','.join(line))
 
 ## override clean data to raw_tracks
-# tracksRaw = open('data/raw_tracks.csv', 'w', encoding='utf-8-sig' )
-# tracksRaw.writelines(cleanRawData)
-# tracksRaw.close()
+tracksRaw = open('data/raw_tracks.csv', 'w', encoding='utf-8-sig' )
+tracksRaw.writelines(cleanRawData)
+tracksRaw.close()
 
 ## ----FIM---- CLEAN DATA ##
