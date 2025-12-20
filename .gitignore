@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Dados sensíveis / áudio grande
+data/audio/
+*.mp3
+*.wav
+*.flac
+
+# IDEs
+.idea/
+.vscode/
+*.suo
+*.swn
+*.swp
