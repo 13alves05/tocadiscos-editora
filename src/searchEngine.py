@@ -167,11 +167,14 @@ teste = input('pesquisa:  ')
 for q in [teste]:
     print(f"\nSearch: '{q}'")
     results = search(q, limit=10)
+
     for r in results:
         if r['doc_type'] == 'track':
-            print(f"   🎵 {r['track_title']} by {r['artist_name']} ({r['album_title']})")
-        elif r['doc_type'] == 'album':
-            print(f"   💿 Album: {r['title']} by {r['artist_name']} — Sold: {r.get('unites_sold', 'N/A')}")
-        elif r['doc_type'] == 'artist':
-            print(f"   👤 Artist: {r['title']} ({r['nationality']}) — Earned: ${r.get('total_earned', 'N/A')}")
+            print(r['doc_id'])
+        # if r['doc_type'] == 'track':
+        #     print(f"   🎵 {r['track_title']} by {r['artist_name']} ({r['album_title']})")
+        # elif r['doc_type'] == 'album':
+        #     print(f"   💿 Album: {r['title']} by {r['artist_name']} — Sold: {r.get('unites_sold', 'N/A')}")
+        # elif r['doc_type'] == 'artist':
+        #     print(f"   👤 Artist: {r['title']} ({r['nationality']}) — Earned: ${r.get('total_earned', 'N/A')}")
     print(f"   --- {len(results)} results ---")

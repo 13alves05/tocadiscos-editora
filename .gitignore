@@ -12,6 +12,7 @@ ENV/
 
 # Dados sensíveis / áudio grande
 data/audio/
+unified_music_index
 *.mp3
 *.wav
 *.flac
