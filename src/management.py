@@ -42,7 +42,7 @@ def realizar_login():  # A função percorre a lista de administradores carregad
     return False
 
 
-def listar_autores(autenticado):  # lista os autores representados pela editora
+def listar_autores():  # lista os autores representados pela editora
     if not lista_autores:
         print("\nNenhum autor registrado.")
         return
@@ -54,11 +54,7 @@ def listar_autores(autenticado):  # lista os autores representados pela editora
     for autor in lista_autores:
         nome = autor.get("artist_name", "N/A")
         nacionalidade = autor.get("artist_nacionality", "N/A")
-
-        if autenticado:  # Se o utilizador estiver autenticado, mostra os direitos
-            direitos = autor.get("rights_percentage", "N/A")
-        else:  # Caso contrário, escondemos a informação sensível
-            direitos = "[ACESSO RESTRITO]"
+        direitos = autor.get("rights_percentage", "N/A")
 
         print(f"{nome:<25} | {nacionalidade:<20} | {direitos}")
 

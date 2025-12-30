@@ -2,9 +2,8 @@ import menu
 import crud
 import history
 import management
-# import reports
-# import audio
-
+import reports
+import audio
 
 def main():
     while True:

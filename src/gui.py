@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import crud
 import management
-#import reports
+import reports
 
 
 def listar_autores():

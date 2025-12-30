@@ -8,7 +8,6 @@ adicionei prints para depurar os valores enquanto desenvolvia
 
 from tabulate import tabulate  # importei esta biblioteca para a tabela ficar bem formatada no terminal
 from crud import load_autores, load_albuns  # usei as funções do crud.py que os meus colegas fizeram
-from auth import is_autorizado  # para verificar a senha antes de mostrar direitos
 
 def calcular_direitos_por_autor(autor):
     # carrego todos os álbuns e filtro só os do autor atual
@@ -29,10 +28,6 @@ def calcular_direitos_por_autor(autor):
     }
 
 def gerar_relatorio(ordenar_por="autor"):
-    # verifico se o utilizador tem autorização para ver os direitos
-    if not is_autorizado():
-
-        return "Acesso negado! Introduza a palavra-passe correta"
     
     autores = load_autores()  # carrego os autores
     linhas = []  # lista para guardar as linhas da tabela
@@ -43,7 +38,7 @@ def gerar_relatorio(ordenar_por="autor"):
           # loop por cada autor
         calc = calcular_direitos_por_autor(autor)  # calculo para este autor
 
-        linhas.append([
+        linhas.append([ 
             autor["artist_name"],  # nome do autor
             autor["rights_percentage"],  # percentagem de direitos
             calc["num_albuns"],  # número de álbuns
@@ -59,11 +54,8 @@ def gerar_relatorio(ordenar_por="autor"):
 
     # ordenação, se for por receita ordena decrescente, senão por nome
     if ordenar_por == "receita":
-
         linhas.sort(key=lambda x: x[4], reverse=True)  # ordena por receita decrescente
-
     else:
-
         linhas.sort(key=lambda x: x[0])  # ordena por nome do autor
     
     # adiciono linha total no final
