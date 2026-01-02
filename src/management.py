@@ -10,16 +10,16 @@ def carregar_dados_sistema():  # carrega todos os dados dos ficheiros CSV para a
     global lista_admins, lista_albuns, lista_autores, lista_musicas
 
     try:
-        with open("admins.csv", mode="r", encoding="utf-8") as f:
+        with open("data/admin_table.csv", mode="r", encoding="utf-8") as f:
             lista_admins = list(csv.DictReader(f))
 
-        with open("albuns.csv", mode="r", encoding="utf-8") as f:
+        with open("data/albums_table.csv", mode="r", encoding="utf-8") as f:
             lista_albuns = list(csv.DictReader(f))
 
-        with open("autores.csv", mode="r", encoding="utf-8") as f:
+        with open("data/authors_table.csv", mode="r", encoding="utf-8") as f:
             lista_autores = list(csv.DictReader(f))
 
-        with open("tracks.csv", mode="r", encoding="utf-8") as f:
+        with open("data/raw_tracks.csv", mode="r", encoding="utf-8") as f:
             lista_musicas = list(csv.DictReader(f))
 
         print("Dados carregados para a memória.")
@@ -42,40 +42,44 @@ def realizar_login():  # A função percorre a lista de administradores carregad
     return False
 
 
-def listar_autores():  # lista os autores representados pela editora
+def listar_autores(autenticado):  # lista os autores representados pela editora
     if not lista_autores:
         print("\nNenhum autor registrado.")
         return
 
-    print("\n" + "=" * 80)
-    print(f"{"ARTISTA":<25} | {"NACIONALIDADE":<20} | {"DIREITOS"}")
-    print("-" * 80)
+    print("\n" + "=" * 100)
+    if autenticado:
+        print(f"{"ARTISTA":<25} | {"NACIONALIDADE":<20} | {"ÁLBUNS":<40} | {"DIREITOS"}")
+    else:
+        print(f"{"ARTISTA":<25} | {"NACIONALIDADE":<20} | {"ÁLBUNS":<40}")
+    print("-" * 100)
 
     for autor in lista_autores:
-        nome = autor.get("artist_name", "N/A")
-        nacionalidade = autor.get("artist_nacionality", "N/A")
-        direitos = autor.get("rights_percentage", "N/A")
+        # Se quiseres usar album_title como lista real, faz: albuns = ast.literal_eval(autor['album_title'])
+        # Mas aqui uso como string para simplicidade
+        albuns = autor.get('album_title', 'N/A')
+        if autenticado:
+            print(f"{autor['artist_name']:<25} | {autor['artist_nacionality']:<20} | {albuns:<40} | {autor.get('rights_percentage', 'N/A')}%")
+        else:
+            print(f"{autor['artist_name']:<25} | {autor['artist_nacionality']:<20} | {albuns:<40}")
 
-        print(f"{nome:<25} | {nacionalidade:<20} | {direitos}")
-
-    print("=" * 80)
+    print("=" * 100)
 
 
-def listar_albuns():  # apresenta a lista de álbuns e respetivas informações
+def listar_albuns():  # lista os álbuns de cada autor
     if not lista_albuns:
         print("\nNenhum álbum registrado.")
         return
 
-    print("\n--- CATÁLOGO DE ÁLBUNS ---")
+    print("\n" + "=" * 120)
+    print(f"{"ÁLBUM":<25} | {"ARTISTA":<20} | {"GÊNERO":<15} | {"LANÇAMENTO":<12} | {"VENDAS":<8} | {"PREÇO":<8} | {"MÚSICAS"}")
+    print("-" * 120)
 
     for alb in lista_albuns:
-        print(f"\nÁlbum: {alb.get( "album_title ",  "Sem título ")}")
-        print(f"  Género: {alb.get( "album_genere",  "N/A")}")
-        print(f"  Data de lançamento: {alb.get( "album_date ",  "N/A ")}")
-        print(f"  Unidades vendidas: {alb.get("unites_sold", "0")}")
-        print(f"  Preço: {alb.get( "album_price",  "0.00 ")}€")
-        print(f"  Músicas: {alb.get( "tracks ",  "N/A")}")
-        print("-" * 60)
+        musicas = alb.get('tracks', 'N/A')  # Lista de músicas
+        print(f"{alb['album_title']:<25} | {alb['artist_name']:<20} | {alb['album_genere']:<15} | {alb.get('album_date', 'N/A'):<12} | {alb['unites_sold']:<8} | {alb['album_price']:<8.2f} | {musicas}")
+
+    print("=" * 120)
 
 
 # RELATÓRIO FINANCEIRO (ACESSO RESTRITO)
@@ -99,8 +103,8 @@ def gerar_relatorio_financeiro(autenticado):
         try:
             nome = autor["artist_name"]
 
-            # Converte a percentagem de str para número
-            percentagem = float(autor["rights_percentage"].replace("%", ""))
+            # Converte a percentagem de str para número (assume que é número puro, sem '%')
+            percentagem = float(autor["rights_percentage"])
 
             # Receita usada como mock data para testes
             receita = float(autor["total_earned"])

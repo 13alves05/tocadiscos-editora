@@ -9,6 +9,7 @@ import os  # para verificar existência de ficheiros
 from typing import Optional  # para anotações de tipos
 import pygame  # biblioteca para reprodução de áudio
 from crud import load_musicas  # para carregar metadados das músicas
+from .BaseDados.getAudioPath import getAudioPath  # para construir caminhos dos ficheiros áudio
 
 def init_audio():
     # inicializo o mixer do pygame

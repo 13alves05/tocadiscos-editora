@@ -40,15 +40,15 @@ def save_autores(autores):
 
             f.write(f"{id_},{a['artist_name']},{a['artist_nacionality']},{a['album_title']},{a['rights_percentage']},{a['total_earned']}\n")
 
-    print("Autores salvos")  # print para depurar
+    print("Autores salvos com sucesso")  # print para depurar
 
 def load_albuns():
-    # carrego álbuns com parsing manual
+    # carrego álbuns do CSV com parsing manual
     albuns = {}
 
     with open("data/albums_table.csv", "r", encoding="utf-8-sig") as f:
 
-        for linha in f.readlines()[1:]:
+        for linha in f.readlines()[1:]:  # salto o cabeçalho
 
             partes = linha.strip().split(",")
             id_ = int(partes[0])
@@ -56,11 +56,11 @@ def load_albuns():
             artista = partes[2]
             genero = partes[3]
             data = partes[4]
-            vendidas = int(partes[5]) if partes[5] else 0
+            vendas = int(partes[5])
             preco = float(partes[6])
-            tracks_str = ",".join(partes[7:])
-            tracks = ast.literal_eval(tracks_str)
-            albuns[id_] = {"album_title": titulo, "artist_name": artista, "album_genere": genero, "album_date": data, "unites_sold": vendidas, "album_price": preco, "tracks": tracks}
+            tracks_str = ",".join(partes[7:])  # junto para lista de tracks
+            tracks = ast.literal_eval(tracks_str)  # converto string para lista
+            albuns[id_] = {"album_title": titulo, "artist_name": artista, "album_genere": genero, "album_date": data, "unites_sold": vendas, "album_price": preco, "tracks": tracks}
 
     print(f"Debug: carreguei {len(albuns)} álbuns")  # print para depurar
 
@@ -72,29 +72,32 @@ def save_albuns(albuns):
 
         f.write("album_id,album_title,artist_name,album_genere,album_date,unites_sold,album_price,tracks\n")
 
-        for id_, a in albuns.items():
+        for id_, alb in albuns.items():
 
-            f.write(f"{id_},{a['album_title']},{a['artist_name']},{a['album_genere']},{a['album_date']},{a['unites_sold']},{a['album_price']},{a['tracks']}\n")
+            f.write(f"{id_},{alb['album_title']},{alb['artist_name']},{alb['album_genere']},{alb['album_date']},{alb['unites_sold']},{alb['album_price']},{alb['tracks']}\n")
 
-    print("Álbuns salvos")  # print para depurar
+    print("Álbuns salvos com sucesso")  # print para depurar
 
 def load_musicas():
-    # carrego músicas com pandas, é mais fácil
-    df = pd.read_csv("data/raw_tracks.csv")
+    # carrego músicas usando pandas por ser grande
+    df = pd.read_csv("data/raw_tracks.csv", encoding="utf-8-sig")
+    musicas = df.to_dict(orient="records")
 
-    return df.to_dict("records")
+    print(f"Debug: carreguei {len(musicas)} músicas")  # print para depurar
+
+    return musicas
 
 def save_musicas(musicas):
-    # salvo músicas com pandas
+    # salvo músicas usando pandas
     df = pd.DataFrame(musicas)
-
     df.to_csv("data/raw_tracks.csv", index=False, encoding="utf-8-sig")
 
-    print("Músicas salvas")  # print para depurar
+    print("Músicas salvas com sucesso")  # print para depurar
 
 def adicionar_autor():
     # adiciono um novo autor
     autores = load_autores()
+
     nome = input("Nome do autor: ").strip()
 
     if any(a["artist_name"].lower() == nome.lower() for a in autores.values()):
