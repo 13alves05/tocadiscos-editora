@@ -4,7 +4,9 @@ import history
 import management
 import reports
 import audio
-from searchEngine import search
+from searchEngine import search, build_unified_index
+
+build_unified_index()
 management.carregar_dados_sistema()
 
 def main():
@@ -36,9 +38,9 @@ def main():
 
                 if escolha_menu_pesquisa == "1":
                     termo = input("Pesquisar autor: ")
-                    resultados = search(termo, filter_type="author")
+                    resultados = search(termo, filter_type="artist")
                     for r in resultados:
-                        print(r["author_name"])
+                        print(r["artist_name"])
                     input("Pressione ENTER para continuar...")     
 
                 elif escolha_menu_pesquisa == "2":
@@ -49,7 +51,10 @@ def main():
                     input("Pressione ENTER para continuar...\n")
 
                 elif escolha_menu_pesquisa == "3":
-                    print("Pesquisa por música ainda não implementada.")
+                    termo = input("Pesquisar música: ")
+                    resultados = search(termo, filter_type="track")
+                    for r in resultados:
+                        print(r["track_title"], "-", r["album_title"], "by", r["artist_name"])
                     input("Pressione ENTER para continuar...\n")
 
                 elif escolha_menu_pesquisa == "0":

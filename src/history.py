@@ -27,7 +27,6 @@ def salvar_snapshot(acao):
     for f in FILES:
 
         if os.path.exists(f):
-
             shutil.copy(f, pasta)
 
     meta = {"acao": acao, "data": ts}
