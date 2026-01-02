@@ -10,7 +10,7 @@ python main.py
 
 # Credenciais de administrador (para ver direitos e relatórios)
 Utilizador: admin
-Senha: admin123
+Senha: admin
 
 # Nota
-Para testar a reprodução de áudio, no menu Player -> 2, escreva: (TEMOS DE VER AINDA)
+Para testar a reprodução de áudio, no menu Player -> 2, escreva: ........................
