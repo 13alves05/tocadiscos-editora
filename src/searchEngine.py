@@ -8,7 +8,7 @@ from whoosh.fields import Schema, TEXT, ID, STORED, KEYWORD
 from whoosh.index import create_in, open_dir, exists_in
 from whoosh.qparser import MultifieldParser
 
-# Unified schema (unchanged)
+# Esquema unificado (inalterado)
 unified_schema = Schema(
     doc_type=KEYWORD(stored=True),
     doc_id=ID(stored=True, unique=True),
@@ -37,9 +37,9 @@ def build_unified_index(
     albums_file="data/albums_table.csv",
     authors_file="data/authors_table.csv"
 ):
-    """Build the unified Whoosh search index from your three CSV files"""
+    """Constrói o índice de busca unificado Whoosh a partir dos três ficheiros CSV"""
     
-    # Clean and recreate index directory
+    # Limpa e recria o diretório do índice
     if os.path.exists(INDEX_DIR):
         shutil.rmtree(INDEX_DIR)
     os.mkdir(INDEX_DIR)
@@ -49,16 +49,16 @@ def build_unified_index(
 
     total_docs = 0
 
-    # =========================== TRACKS ===========================
+    # =========================== Músicas ===========================
     if Path(tracks_file).exists():
-        with open(tracks_file, newline='', encoding='utf-8') as f:  # Changed back to utf-8
+        with open(tracks_file, newline='', encoding='utf-8') as f:  # Alterado para utf-8
             reader = csv.DictReader(f)
-            # Strip BOM and whitespace from fieldnames manually
+            # Remove BOM e espaços dos nomes dos campos manualmente
             reader.fieldnames = [name.lstrip('\ufeff').strip() for name in reader.fieldnames]
-            print(f"Indexing tracks — columns: {reader.fieldnames}")
+            print(f"Indexando tracks — colunas: {reader.fieldnames}")
 
             for row in reader:
-                # Duplicate columns: use the first one (they are identical)
+                # Colunas duplicadas: usa a primeira (são idênticas)
                 nationality = row['artist_nacionality']
                 price = row['track_price']
 
@@ -69,74 +69,76 @@ def build_unified_index(
                     artist_name=row['artist_name'],
                     genres=row['track_genres'],
                     nationality=nationality,
+
                     album_title=row['album_title'],
                     track_title=row['track_title'],
                     track_price=price,
                 )
                 total_docs += 1
     else:
-        print(f"Warning: Tracks file not found: {tracks_file}")
+        print(f"Aviso: Ficheiro de tracks não encontrado: {tracks_file}")
 
-    # =========================== ALBUMS ===========================
+    # =========================== Albuns ===========================
     if Path(albums_file).exists():
         with open(albums_file, newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             reader.fieldnames = [name.lstrip('\ufeff').strip() for name in reader.fieldnames]
-            print(f"Indexing albums — columns: {reader.fieldnames}")
+            print(f"Indexando álbuns — colunas: {reader.fieldnames}")
 
             for row in reader:
-                track_list = row.get('tracks', '')
-
                 writer.add_document(
                     doc_type="album",
                     doc_id=f"album_{row['album_id']}",
                     title=row['album_title'],
                     artist_name=row['artist_name'],
-                    genres=row.get('album_genere', ''),
-                    nationality="",
+                    genres=row['album_genere'],
+                    nationality=row.get('artist_nacionality', ''),
+
                     album_title=row['album_title'],
-                    unites_sold=row.get('unites_sold', ''),
-                    album_price=row.get('album_price', ''),
-                    album_date=row.get('album_date', ''),
-                    track_list=track_list,
+                    unites_sold=row['unites_sold'],
+                    album_price=row['album_price'],
+                    album_date=row['album_date'],
+                    track_list=row['tracks'],
                 )
                 total_docs += 1
     else:
-        print(f"Warning: Albums file not found: {albums_file}")
+        print(f"Aviso: Ficheiro de álbuns não encontrado: {albums_file}")
 
-    # =========================== ARTISTS ===========================
+    # =========================== Autores ===========================
     if Path(authors_file).exists():
         with open(authors_file, newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             reader.fieldnames = [name.lstrip('\ufeff').strip() for name in reader.fieldnames]
-            print(f"Indexing artists — columns: {reader.fieldnames}")
+            print(f"Indexando autores — colunas: {reader.fieldnames}")
 
             for row in reader:
-                album_list = row.get('album_title', '')
+                # Lista de álbuns como string para armazenar
+                album_list = row['album_title']
 
                 writer.add_document(
                     doc_type="artist",
-                    doc_id=f"artist_{row['author_id']}",  # Note: author_id in your file
+                    doc_id=f"artist_{row['author_id']}",
                     title=row['artist_name'],
                     artist_name=row['artist_name'],
-                    genres="",
+                    genres='',  # Autores não têm géneros diretos
                     nationality=row['artist_nacionality'],
-                    total_earned=row.get('total_earned', ''),
+
+                    total_earned=row['total_earned'],
                     rights_percentage=row.get('rights_percentage', ''),
                     album_list=album_list,
                 )
                 total_docs += 1
     else:
-        print(f"Warning: Artists file not found: {authors_file}")
+        print(f"Aviso: Ficheiro de autores não encontrado: {authors_file}")
 
-    # Finalize index
+    # Finaliza o índice
     writer.commit()
-    print(f"\nUnified search index built successfully with {total_docs} items (tracks + albums + artists)!")
+    print(f"\nÍndice de busca unificado construído com sucesso com {total_docs} itens (tracks + álbuns + autores)!")
 
 def search(query_str, limit=20, filter_type=None):
-    """Search across tracks, albums, and artists"""
+    """Pesquisa em tracks, álbuns e autores"""
     if not exists_in(INDEX_DIR):
-        print("Index not found. Run build_unified_index() first.")
+        print("Índice não encontrado. Execute build_unified_index() primeiro.")
         return []
 
     ix = open_dir(INDEX_DIR)
@@ -150,31 +152,7 @@ def search(query_str, limit=20, filter_type=None):
 
         hits = [r.fields() for r in results]
         
-        # Optional: sort by relevance score descending
+        # Opcional: ordena por pontuação de relevância descendente
         # hits.sort(key=lambda x: x.get('score', 0), reverse=True)
         
         return hits
-
-# =============================================================================
-# === TEST / RUN DIRECTLY BELOW ===============================================
-# =============================================================================
-
-# 1. Build the index (run this once or whenever your CSVs change)
-build_unified_index()
-
-# 2. Try some searches
-teste = input('pesquisa:  ')
-for q in [teste]:
-    print(f"\nSearch: '{q}'")
-    results = search(q, limit=10)
-
-    for r in results:
-        if r['doc_type'] == 'track':
-            print(r['doc_id'])
-        # if r['doc_type'] == 'track':
-        #     print(f"   🎵 {r['track_title']} by {r['artist_name']} ({r['album_title']})")
-        # elif r['doc_type'] == 'album':
-        #     print(f"   💿 Album: {r['title']} by {r['artist_name']} — Sold: {r.get('unites_sold', 'N/A')}")
-        # elif r['doc_type'] == 'artist':
-        #     print(f"   👤 Artist: {r['title']} ({r['nationality']}) — Earned: ${r.get('total_earned', 'N/A')}")
-    print(f"   --- {len(results)} results ---")

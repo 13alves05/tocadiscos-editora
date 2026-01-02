@@ -54,9 +54,9 @@ def menu_relatorio():
 def menu_player():
     opcoes_validas = {"1", "2", "0"}
     while True:
-        print("\n--- PLAYER ---")
-        print("1 - Selecionar música.")
-        print("2 - Reproduzir.")
+        print("\n--- MENU PLAYER ---")
+        print("1 - Selecionar música")
+        print("2 - Reproduzir música")
         print("0 - Voltar")
         escolha = input("Opção: ").strip()
         if escolha in opcoes_validas:
@@ -66,14 +66,17 @@ def menu_player():
 def menu_historico():
     opcoes_validas = {"1", "2", "0"}
     while True:
-        print("\n--- MENU HISTORICO ---")
+        print("\n--- MENU HISTÓRICO ---")
         print("1 - Ver histórico")
-        print("2 - Desfazer")
+        print("2 - Desfazer última ação")
         print("0 - Voltar")
         escolha = input("Opção: ").strip()
         if escolha in opcoes_validas:
             return escolha
         print("Opção inválida. Tente novamente.")
+
+# if __name__ == "__main__":
+#     menu_principal()
 
 
 # from tabulate import tabulate

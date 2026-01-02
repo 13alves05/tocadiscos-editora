@@ -4,6 +4,8 @@ import history
 import management
 import reports
 import audio
+from searchEngine import search
+management.carregar_dados_sistema()
 
 def main():
     while True:
@@ -14,7 +16,9 @@ def main():
                 escolha_menu_autores = menu.menu_autores()
 
                 if escolha_menu_autores == "1":
-                    crud.load_autores()
+                    # Listar autores - se quiser ver os direitos tem de fazer login
+                    autenticado = management.realizar_login()  # pede senha se necessário
+                    management.listar_autores(autenticado)  # passa True ou False para mostrar/esconder direitos
 
                 elif escolha_menu_autores == "2":
                     crud.adicionar_autor()
@@ -25,15 +29,23 @@ def main():
 
                 elif escolha_menu_autores == "0":
                     break  # volta ao menu principal
+
         elif escolha_menu_principal == "2":
             while True:
                 escolha_menu_pesquisa = menu.menu_pesquisa()
 
                 if escolha_menu_pesquisa == "1":
-                    management.listar_autores()
+                    termo = input("Pesquisar autor: ")
+                    resultados = search(termo, filter_type="author")
+                    for r in resultados:
+                        print(r["author_name"])
+                    input("Pressione ENTER para continuar...")     
 
                 elif escolha_menu_pesquisa == "2":
-                    print("Pesquisa por álbum ainda não implementada.")
+                    termo = input("Pesquisar álbum: ")
+                    resultados = search(termo, filter_type="album")
+                    for r in resultados:
+                        print(r["album_title"], "-", r["artist_name"])
                     input("Pressione ENTER para continuar...\n")
 
                 elif escolha_menu_pesquisa == "3":
@@ -46,12 +58,16 @@ def main():
         elif escolha_menu_principal == "3":
             autorizado = management.realizar_login()
             if not autorizado:
-                continue # volta ao menu principal
+                print("Acesso negado ao menu de relatórios.")
+                input("Pressione ENTER para continuar...")
+                continue
             while True:
                 escolha_menu_relatorio = menu.menu_relatorio()
-                if  escolha_menu_relatorio == "1":
+                if escolha_menu_relatorio == "1":
                     autor = input("Autor: ")
-                    reports.calcular_direitos_por_autor(autor)
+                    # aqui ficaria a funcionalidade de relatório individual (ainda não feita)
+                    print(f"Relatório individual de {autor} - em desenvolvimento")
+                    input("Pressione ENTER para continuar...")
                     
                 elif escolha_menu_relatorio == "2":
                     reports.gerar_relatorio()
@@ -65,10 +81,13 @@ def main():
                 escolha_menu_player = menu.menu_player()
 
                 if escolha_menu_player == "1":
-                    audio.encontrar_caminho_musica()
+                    # Selecionar música (ainda sem implementação completa)
+                    print("Funcionalidade de seleção em desenvolvimento")
+                    input("Pressione ENTER para continuar...")
 
                 elif escolha_menu_player == "2":
-                    audio.reproduzir_musica()
+                    titulo = input("Título da música para reproduzir: ")
+                    audio.reproduzir_musica(titulo)
 
                 elif escolha_menu_player == "0":
                     break  # volta ao menu principal
@@ -76,11 +95,12 @@ def main():
         elif escolha_menu_principal == "5":
             while True:
                 escolha_menu_historico = menu.menu_historico()
-                if  escolha_menu_historico == "1":
+                if escolha_menu_historico == "1":
                     history.ver_historico()
                     
                 elif escolha_menu_historico == "2":
-                    history.reverter_snapshot()
+                    nome = input("Nome do snapshot para reverter: ")
+                    history.reverter_snapshot(nome)
                     
                 elif escolha_menu_historico == "0":
                     break

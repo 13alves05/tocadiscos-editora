@@ -1,3 +1,5 @@
 pygame
 tabulate
 schema
+whoosh
+pandas

@@ -85,9 +85,3 @@ def reverter_snapshot(nome):
     print(f"Revertido para {nome}")  # print para depurar
 
     return True
-
-if __name__ == "__main__":
-
-    salvar_snapshot("Teste inicial")
-    
-    print(ver_historico())

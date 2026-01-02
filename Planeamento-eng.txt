@@ -1,0 +1,127 @@
+Development Plan for Tocadiscos Application
+This is structured like a Trello board, with Lists as columns (e.g., Base de Dados, Backend, Frontend, Gerais/Integração). Each list contains Cards representing tasks, including descriptions, dependencies, suggested responsible, and notes on parallelism. Use this to assign, track progress (e.g., To Do, In Progress, Done), and collaborate.
+List: Base de Dados
+
+Card: Task 1.1 - Setup inicial de dados
+Description: Baixe e integre o dataset FMA (via GitHub). Converta metadados relevantes para CSV (autores.csv, albuns.csv, musicas.csv). Defina esquemas.
+Dependencies: None.
+Suggested Responsible: Membro 1.
+Parallelism: Independent.
+Labels: High Priority, Data Setup.
+Card: Task 1.2 - Funções de leitura/escrita CSV
+Description: Implemente funções para carregar/descarregar dados de CSV (csv module or Pandas). Validação de dados.
+Dependencies: Task 1.1.
+Suggested Responsible: Membro 1.
+Parallelism: Test with mock data after setup.
+Labels: Core I/O.
+Card: Task 1.3 - Integração de áudio e paths
+Description: Organize áudio do FMA em pastas. Atualize CSV com caminhos. Teste acessibilidade.
+Dependencies: Task 1.1.
+Suggested Responsible: Membro 1.
+Parallelism: Independent, integrate with Backend later.
+Labels: Audio Handling.
+Card: Task 1.4 - Sistema de histórico com Pickle
+Description: Salve estados em Pickle. Funções para salvar ações e reverter.
+Dependencies: Task 1.2.
+Suggested Responsible: Membro 1.
+Parallelism: Parallel with I/O functions.
+Labels: History Feature.
+
+List: Backend
+
+Card: Task 2.1 - Autenticação e acesso restrito
+Description: Verificação de senha. Condicione visibilidade de direitos e relatórios.
+Dependencies: None.
+Suggested Responsible: Membro 2.
+Parallelism: Independent, test with mocks.
+Labels: Security.
+Card: Task 2.2 - Funções de listagem e exibição
+Description: Listar autores e álbuns com dados relevantes (condicionado). Use lists/dicts in memory.
+Dependencies: Task 1.2.
+Suggested Responsible: Membro 2.
+Parallelism: Use mock data initially.
+Labels: Display Logic.
+Card: Task 2.3 - Cálculo de direitos e relatório tabular
+Description: Calcule direitos (percent * units * price). Gere tabela com ordenação e totais. Restrinja acesso.
+Dependencies: Task 2.2.
+Suggested Responsible: Membro 2.
+Parallelism: Parallel with listing.
+Labels: Calculation, Reporting.
+Card: Task 2.4 - Adicionar/Remover autores e atualização
+Description: Funções para criar/remover autores. Atualize CSV e histórico.
+Dependencies: Task 1.2, Task 2.1.
+Suggested Responsible: Membro 3.
+Parallelism: After I/O, test integrated.
+Labels: CRUD Operations.
+Card: Task 2.5 - Pesquisa por autor/álbum/música
+Description: Busca simples ou avançada (string matching/regex). Retorne filtrados.
+Dependencies: Task 2.2.
+Suggested Responsible: Membro 3.
+Parallelism: Independent after listing.
+Labels: Search Feature.
+Card: Task 2.6 - Reprodução de áudio
+Description: Integre PyGame mixer para play/pause/stop. Lide com erros.
+Dependencies: Task 1.3.
+Suggested Responsible: Membro 3.
+Parallelism: Test isolately with sample files.
+Labels: Audio Playback.
+Card: Task 2.7 - Histórico e reversão de ações
+Description: Integre com ações. Visualize e reverta via Pickle.
+Dependencies: Task 1.4, Tasks 2.4-2.6.
+Suggested Responsible: Membro 2.
+Parallelism: Finalize after other logics.
+Labels: Undo Feature.
+
+List: Frontend
+
+Card: Task 3.1 - Estrutura do menu principal
+Description: Menu CLI em loop com opções (listar, calcular, etc.). Use print/input.
+Dependencies: None.
+Suggested Responsible: Membro 4.
+Parallelism: Independent, mock backend.
+Labels: UI Base.
+Card: Task 3.2 - Integração de listagem e exibição
+Description: Conecte menu a listagem. Formate outputs (tabelas).
+Dependencies: Task 2.2, Task 3.1.
+Suggested Responsible: Membro 4.
+Parallelism: After base menu.
+Labels: UI Integration.
+Card: Task 3.3 - Integração de relatório e autenticação
+Description: Prompts de senha para restritos. Exiba relatório.
+Dependencies: Tasks 2.1 & 2.3, Task 3.1.
+Suggested Responsible: Membro 4.
+Parallelism: Parallel with other integrations.
+Labels: Secure UI.
+Card: Task 3.4 - Integração de add/remove/pesquisa
+Description: Inputs manuais. Chame backend e atualize.
+Dependencies: Tasks 2.4-2.5, Task 3.1.
+Suggested Responsible: Membro 4.
+Parallelism: After menu.
+Labels: CRUD UI.
+Card: Task 3.5 - Integração de reprodução e histórico
+Description: Seleção para play. Opções para histórico/reversão.
+Dependencies: Tasks 2.6-2.7, Task 3.1.
+Suggested Responsible: Membro 4.
+Parallelism: Finalize after others.
+Labels: Advanced UI.
+
+List: Gerais/Integração
+
+Card: Task 4.1 - Testes unitários e integração
+Description: Testes com unittest. Integre em main.py. Teste end-to-end.
+Dependencies: All above.
+Suggested Responsible: Whole Team.
+Parallelism: Incremental.
+Labels: Testing, QA.
+Card: Task 4.2 - Documentação e apresentação
+Description: Comente código. README com instruções, diagramas. Prepare demo.
+Dependencies: Task 4.1.
+Suggested Responsible: Whole Team.
+Parallelism: Throughout development.
+Labels: Docs, Presentation.
+
+Board Notes:
+
+Total Estimated Time: 2-3 weeks for 3-4 members.
+Tools: Python, PyGame, Pandas, Pickle, Git.
+Workflow: Weekly meetings for merges. Assign cards based on skills. Move cards across lists (To Do → In Progress → Done). If adding GUI (extra), create new list.
