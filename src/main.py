@@ -31,7 +31,7 @@ def main():
                         print("\nNenhum autor encontrado.")
                         break
                     for r in resultados:
-                        print(f"Autor: {r["artist_name"]} — Gênero: {r.get('genres', "N/A")} — Nacionalidade: {r['nationality']}")
+                        print(f"Autor: {r["artist_name"]} - Gênero: {r.get('genres', "N/A")} - Nacionalidade: {r['nationality']}")
 
                 elif escolha_menu_pesquisa == "3":
                     termo = input("Pesquisar álbum: ")
@@ -42,7 +42,7 @@ def main():
                     album_tracks = resultados[0]['track_list']
                     track_list = ast.literal_eval(album_tracks)
                     for r in resultados:
-                        print(f"Album: {r['title']} by {r['artist_name']} — Gênero: {r.get('genres', "N/A")} — Data de lançamento: {r['album_date']} — Preço: {r.get('album_price', "N/A")} — Vendido: {r.get('unites_sold', 'N/A')} unidades")
+                        print(f"Album: {r['title']} by {r['artist_name']} - Gênero: {r.get('genres', "N/A")} - Data de lançamento: {r['album_date']} - Preço: {r.get('album_price', "N/A")} - Vendido: {r.get('unites_sold', 'N/A')} unidades")
                     nomes_musicas = [track[1] for track in track_list]
                     print("Músicas:", ", ".join(nomes_musicas))
 
@@ -85,20 +85,27 @@ def main():
                     break
         
         elif escolha_menu_principal == "3":
-            audio.init_audio() # inicializa o mixer do pygame
+            audio.init_audio()  # inicializa o mixer do pygame
+            musica_selecionada = None
+
             while True:
                 escolha_menu_player = menu.menu_player()
 
                 if escolha_menu_player == "1":
-                    # Selecionar música (ainda sem implementação completa)
-                    print("Funcionalidade de seleção em desenvolvimento")
+                    musica_selecionada = input("Título da música: ").strip()
+                    print(f"Música selecionada: {musica_selecionada}")
 
                 elif escolha_menu_player == "2":
-                    titulo = input("Título da música para reproduzir: ")
-                    audio.reproduzir_musica(titulo)
+                    if musica_selecionada:
+                        resultado = audio.reproduzir_musica(musica_selecionada)
+                        if resultado:
+                            print(resultado)
+                    else:
+                        print("Nenhuma música selecionada.")
 
                 elif escolha_menu_player == "0":
                     break  # volta ao menu principal
+
                 
         elif escolha_menu_principal == "4":
             while True:
