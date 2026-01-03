@@ -1,15 +1,12 @@
 """
 Operações de I/O para os ficheiros CSV autores, álbuns, músicas.
 Funções de carregamento, gravação, adicionar/remover autores com integração com history.salvar_snapshot.
-Validação com schemas de BaseDados.dataSchema.
 """
 import csv
 import ast
-import os
 from pathlib import Path
 import pandas as pd
 from history import salvar_snapshot
-from BaseDados import dataSchema as dS  # Usamos os schemas de validação
 
 # Caminhos dos ficheiros
 AUTHORS_FILE = Path("data/authors_table.csv")
@@ -31,52 +28,56 @@ def load_autores():
         return autores
 
     with open(AUTHORS_FILE, "r", encoding="utf-8-sig") as authors_file:
-        authors_list = csv.DictReader(authors_file)
-        for author in authors_list:
+        reader = csv.DictReader(authors_file)
+        for row in reader:
             try:
-                author_id = int(author['author_id'])
-                album_str = author.get('album_title', [])
+                author_id = int(row['author_id'])
+                album_str = row.get('album_title', '[]')
 
                 try:
                     albums_list = ast.literal_eval(album_str)
-                    author['album_title'] = albums_list
                     if not isinstance(albums_list, list):
                         albums_list = []
                 except:
                     albums_list = []
-            
-                autores[author_id] = author
-            except:
-                continue
+
+                # Guardamos o dicionário completo, mas com album_title já parseado
+                row_copy = row.copy()
+                row_copy['album_title'] = albums_list
+                autores[author_id] = row_copy
+            except (ValueError, KeyError):
+                continue  # ignora linhas inválidas
     
-    print(f"Debug: carreguei {len(autores)} álbuns")
+    print(f"Debug: carreguei {len(autores)} autores")
     return autores
 
 
 def load_albuns():
-    """Carrega álbuns ignorando cabeçalho e linhas inválidas."""
+    """Carrega álbuns, parseando a lista de tracks"""
     albuns = {}
     if not ALBUMS_FILE.exists():
         return albuns
 
     with open(ALBUMS_FILE, "r", encoding="utf-8-sig") as albums_file:
-        albums_list = csv.DictReader(albums_file)
-        for album in albums_list:
+        reader = csv.DictReader(albums_file)
+        for row in reader:
             try:
-                album_id = int(album['album_id'])
-                album_tracks = album['tracks']
+                album_id = int(row['album_id'])
+                tracks_str = row.get('tracks', '[]')
 
                 try:
-                    tracks_list = ast.literal_eval(album_tracks)
-                    album['tracks'] = tracks_list
+                    tracks_list = ast.literal_eval(tracks_str)
                     if not isinstance(tracks_list, list):
-                        album['tracks'] = []
+                        tracks_list = []
                 except:
-                    album['tracks'] = []
-                
-                albuns[album_id] = tracks_list
+                    tracks_list = []
 
-            except:
+                # Guardamos o dicionário completo do álbum
+                row_copy = row.copy()
+                row_copy['tracks'] = tracks_list
+                albuns[album_id] = row_copy
+
+            except (ValueError, KeyError):
                 continue
 
     print(f"Debug: carreguei {len(albuns)} álbuns")
@@ -84,7 +85,7 @@ def load_albuns():
 
 
 def load_musicas():
-    """Carrega músicas"""
+    """Carrega músicas usando pandas para maior robustez"""
     if not TRACKS_FILE.exists():
         return []
 
@@ -97,61 +98,69 @@ def load_musicas():
 
 # ====================== GRAVAÇÃO SEGURA ======================
 
-def save_autores(autores):
-    if not autores:
-        print("Não existem autores para Salvar")
+def save_autores(autores_dict):
+    """Grava autores no CSV"""
+    if not autores_dict:
+        print("Não existem autores para salvar.")
         return
 
-    """Grava autores sobrescrevendo o ficheiro."""
-    with open(AUTHORS_FILE, "w", encoding="utf-8-sig", newline='') as authors_file:
-        writer = csv.DictWriter(authors_file)
-        writer.writerow(AUTHORS_HEADER)
+    autores_list = []
+    for author_id, data in sorted(autores_dict.items(), key=lambda x: x[0]):
+        autores_list.append({
+            'author_id': author_id,
+            'artist_name': data['artist_name'],
+            'artist_nacionality': data['artist_nacionality'],
+            'album_title': str(data['album_title']),  # converte lista para string
+            'rights_percentage': data['rights_percentage'],
+            'total_earned': data['total_earned'],
+        })
 
-        # 'author_id','artist_name','artist_nacionality','album_title','rights_percentage','total_earned'
-        for author_id, data in sorted(autores.items()):
-            albums_str = str(data['album_title'])
-            writer.writerow([
-                author_id,
-                data['artist_name'],
-                data['artist_nacionality'],
-                albums_str,
-                data['rights_percentage'],
-                data['total_earned'],
-            ])
+    with open(AUTHORS_FILE, "w", encoding="utf-8", newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=AUTHORS_HEADER)
+        writer.writeheader()
+        writer.writerows(autores_list)
 
-    print("Autores salvos com sucesso")
+    salvar_snapshot("Atualizado authors_table.csv")
+    print("Autores salvos com sucesso.")
 
 
-def save_albuns(albuns):
-    if not albuns:
-        print('Não existem albuns para salvar')
+def save_albuns(albuns_dict):
+    """Grava álbuns no CSV"""
+    if not albuns_dict:
+        print("Não existem álbuns para salvar.")
         return
 
-    """Grava álbuns sobrescrevendo o ficheiro."""
-    with open(ALBUMS_FILE, "w", encoding="utf-8-sig", newline='') as albums_file:
-        writer = csv.DictWriter(albums_file)
-        writer.writerow(ALBUMS_HEADER)
+    albuns_list = []
+    for album_id, data in sorted(albuns_dict.items(), key=lambda x: x[0]):
+        albuns_list.append({
+            'album_id': album_id,
+            'album_title': data['album_title'],
+            'artist_name': data['artist_name'],
+            'album_genere': data['album_genere'],
+            'album_date': data['album_date'],
+            'unites_sold': data['unites_sold'],
+            'album_price': data['album_price'],
+            'tracks': str(data['tracks']),  # converte lista para string
+        })
 
-# 'album_id','album_title','artist_name','album_genere','album_date','unites_sold','album_price','tracks'
-        for album_id, data in sorted(albuns.items()):
-            album_tracks = str(data['tracks'])
-            writer.writerow([
-                album_id,
-                data['album_title'],
-                data['artist_name'],
-                data['album_genere'],
-                data['album_date'],
-                data['unites_sold'],
-                data['album_price'],
-                album_tracks,
-            ])
-    print("Álbuns salvos com sucesso")
+    with open(ALBUMS_FILE, "w", encoding="utf-8", newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=ALBUMS_HEADER)
+        writer.writeheader()
+        writer.writerows(albuns_list)
+
+    salvar_snapshot("Atualizado albums_table.csv")
+    print("Álbuns salvos com sucesso.")
 
 
-def save_musicas(musicas):
-    """Grava músicas sobrescrevendo o ficheiro."""
-    pd.DataFrame(musicas).to_csv(TRACKS_FILE, index=False, encoding="utf-8-sig")
-    print("Músicas salvas com sucesso")
+def save_musicas(musicas_list):
+    """Grava músicas no CSV usando pandas"""
+    if not musicas_list:
+        print("Não existem músicas para salvar.")
+        return
+
+    pd.DataFrame(musicas_list).to_csv(TRACKS_FILE, index=False, encoding="utf-8")
+    salvar_snapshot("Atualizado raw_tracks.csv")
+    print("Músicas salvas com sucesso.")
 
 
 # ====================== OPERAÇÕES CRUD ======================
@@ -161,7 +170,7 @@ def adicionar_autor():
     autores = load_autores()
 
     nome = input("Nome do autor: ").strip()
-    if nome.lower() in [a["artist_name"].lower() for a in autores.values()]:
+    if any(a["artist_name"].lower() == nome.lower() for a in autores.values()):
         print("Autor já existe.")
         return
 
@@ -184,27 +193,22 @@ def adicionar_autor():
         "total_earned": 0.0
     }
 
-    salvar_snapshot(f"Adicionado autor '{nome}'")
     save_autores(autores)
     print("Autor adicionado com sucesso!")
 
 
 def remover_autor(nome):
-    """
-    Remove um autor do sistema:
-    - Remove todos os álbuns e músicas relacionados
-    - Atualiza CSV
-    - Cria snapshot no histórico
-    """
+    """Remove um autor e tudo relacionado"""
     autores = load_autores()
-
     chave = next((k for k, a in autores.items() if a["artist_name"].lower() == nome.lower()), None)
 
     if not chave:
-        print("Autor não encontrado")
+        print("Autor não encontrado.")
+        return
 
     if input("Confirma remoção (s/n): ").lower() != "s":
-        print("Operação cancelada")
+        print("Operação cancelada.")
+        return
 
     # Remove autor
     del autores[chave]
@@ -219,9 +223,5 @@ def remover_autor(nome):
     musicas = [m for m in musicas if m["artist_name"].lower() != nome.lower()]
     save_musicas(musicas)
 
-    # Snapshot histórico
-    salvar_snapshot(f"Removido {nome}")
     save_autores(autores)
-
-    print("Autor removido")  # print para depurar
-    return "Autor removido com sucesso"
+    print("Autor removido com sucesso!")

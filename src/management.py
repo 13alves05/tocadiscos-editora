@@ -44,7 +44,7 @@ def realizar_login():  # A função percorre a lista de administradores carregad
 
 def listar_autores(autenticado):
     if not lista_autores:
-        print("\nNenhum autor registrado.")
+        print("\nNenhum autor registado.")
         return
 
     print("\n" + "=" * 90)
@@ -64,7 +64,7 @@ def listar_autores(autenticado):
         album_raw = autor.get("album_title", "")
 
         if not album_raw or album_raw.strip() in ("", "N/A", "[]"):
-            album = "Sem álbum registrado"
+            album = "Sem álbum registado"
         else:
             try:
                 albums_list = ast.literal_eval(album_raw.strip())
@@ -75,9 +75,9 @@ def listar_autores(autenticado):
                     else:
                         album = str(primeiro).strip()
                 else:
-                    album = "Sem álbum registrado"
+                    album = "Sem álbum registado"
             except (ValueError, SyntaxError, Exception):
-                album = "Sem álbum registrado"
+                album = "Sem álbum registado"
 
         # === DIREITOS - PROTEGIDO CONTRA None OU VALORES INVÁLIDOS ===
         if autenticado:
@@ -108,7 +108,7 @@ def listar_autores(autenticado):
 
 def listar_albuns():  # apresenta a lista de álbuns e respetivas informações
     if not lista_albuns:
-        print("\nNenhum álbum registrado.")
+        print("\nNenhum álbum registado.")
         return
 
     print("\n--- CATÁLOGO DE ÁLBUNS ---")
