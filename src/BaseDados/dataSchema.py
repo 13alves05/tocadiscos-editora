@@ -19,6 +19,18 @@ def non_empty_str(value):
         raise ValueError("Tem de ser uma string não vazia")
     return str(value).strip()
 
+
+def valid_list_string(value):
+    string = str(value).strip()
+
+    if not string:
+        string = []
+    if not (string.startswith('[') and string.endswith(']')):
+        raise ValueError('Esta string deve conter uma representação de uma lista')
+    
+    return string
+
+
 def positive_int(value):
     # Converte para inteiro e verifica se é positivo (> 0)
     try:
@@ -28,6 +40,7 @@ def positive_int(value):
         return i
     except:
         raise ValueError(f"{value} tem de ser um inteiro positivo")
+
 
 def non_negative_int(value):
     # Converte para inteiro e verifica se é não negativo (>= 0)
@@ -39,6 +52,7 @@ def non_negative_int(value):
     except:
         raise ValueError(f"{value} tem de ser um inteiro não negativo")
 
+
 def positive_float(value):
     # Converte para float e verifica se é positivo (> 0)
     try:
@@ -48,6 +62,7 @@ def positive_float(value):
         return f
     except:
         raise ValueError(f"{value} tem de ser um número positivo")
+
 
 def non_negative_float(value):
     # Converte para float e verifica se é não negativo (>= 0)
@@ -59,12 +74,14 @@ def non_negative_float(value):
     except:
         raise ValueError(f"{value} tem de ser um número não negativo")
 
+
 def valid_date(value):
     # Verifica se a data está no formato YYYY-MM-DD
     s = str(value)
     if not re.match(r"^\d{4}-\d{2}-\d{2}$", s):
         raise ValueError(f"{s} não é uma data válida (deve ser YYYY-MM-DD)")
     return s
+
 
 def valid_genres(value):
     # Aceita string não vazia ou lista de strings não vazias para track_genres
@@ -87,7 +104,7 @@ authorsSchema = Schema(
         int: {
             'artist_name': non_empty_str,
             'artist_nacionality': non_empty_str,
-            'album_title': And(list, len),  # lista não vazia de álbuns
+            'album_title': valid_list_string,  # lista não vazia de álbuns
             'rights_percentage': And(positive_int, lambda x: 10 <= x <= 50),
             'total_earned': non_negative_float,
         }
@@ -104,7 +121,7 @@ albumsSchema = Schema(
             'album_date': valid_date,
             'unites_sold': non_negative_int,
             'album_price': non_negative_float,
-            'tracks': And(list, len),  # lista não vazia de músicas
+            'tracks': valid_list_string,  # lista não vazia de músicas
         }
     }
 )

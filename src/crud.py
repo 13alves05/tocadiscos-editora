@@ -16,6 +16,10 @@ AUTHORS_FILE = Path("data/authors_table.csv")
 ALBUMS_FILE = Path("data/albums_table.csv")
 TRACKS_FILE = Path("data/raw_tracks.csv")
 
+# Headers das Tabelas
+AUTHORS_HEADER = ['author_id','artist_name','artist_nacionality','album_title','rights_percentage','total_earned']
+ALBUMS_HEADER = ['album_id','album_title','artist_name','album_genere','album_date','unites_sold','album_price','tracks']
+TRACKS_HEADER = ['track_id','album_id','album_title','artist_id','artist_name','track_date_recorded','track_genres','track_interest','track_number','track_title','artist_nacionality','track_price','artist_nacionality','track_price']
 
 # ====================== CARREGAMENTO SEGURO ======================
 
@@ -94,6 +98,7 @@ def load_musicas():
 def save_autores(autores):
     """Grava autores sobrescrevendo o ficheiro."""
     with open(AUTHORS_FILE, "w", encoding="utf-8-sig", newline='') as f:
+        writer = csv.DictWriter
         f.write("author_id,artist_name,artist_nacionality,album_title,rights_percentage,total_earned\n")
         for id_, autor in sorted(autores.items()):
             f.write(f"{id_},{autor['artist_name']},{autor['artist_nacionality']},{autor['album_title']},{autor['rights_percentage']},{autor['total_earned']}\n")
