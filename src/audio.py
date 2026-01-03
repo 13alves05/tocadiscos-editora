@@ -47,9 +47,9 @@ def reproduzir_musica(titulo_track, titulo_album=None):
     """
     Reproduz uma música via terminal.
     Controlo:
-      ENTER → pausa/retoma
-      s     → parar
-      q     → sair
+      ENTER -> pausa/retoma
+      s     -> parar
+      q     -> sair
     """
     init_audio()
 
@@ -61,7 +61,7 @@ def reproduzir_musica(titulo_track, titulo_album=None):
         pygame.mixer.music.load(caminho)
         pygame.mixer.music.play()
 
-        print(f"\n🎵 A reproduzir: {titulo_track}")
+        print(f"\nA reproduzir: {titulo_track}")
         print("ENTER = pausa/retomar | s = parar | q = sair")
 
         pausado = False
