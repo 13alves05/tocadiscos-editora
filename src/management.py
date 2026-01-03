@@ -1,4 +1,5 @@
 import csv
+import ast
 
 lista_admins = []  # utilizadores autorizados (login)
 lista_albuns = []
@@ -41,33 +42,73 @@ def realizar_login():  # A função percorre a lista de administradores carregad
     print("Acesso negado.")
     return False
 
-
-def listar_autores(autenticado):  # lista os autores representados pela editora
+def listar_autores(autenticado):
     if not lista_autores:
-        print("\nNenhum autor registrado.")
+        print("\nNenhum autor registado.")
         return
 
-    print("\n" + "=" * 80)
-    print(f"{"ARTISTA":<25} | {"NACIONALIDADE":<20} | {"DIREITOS"}")
-    print("-" * 80)
+    print("\n" + "=" * 90)
+    print(f"{"ARTISTA":<30} | {"NACIONALIDADE":<20} | {"ÁLBUM":<35} | {"DIREITOS"}")
+    print("-" * 90)
+
+    ultimo_artista = None
+    ultima_nacionalidade = None
 
     for autor in lista_autores:
-        nome = autor.get("artist_name", "N/A")
-        nacionalidade = autor.get("artist_nacionality", "N/A")
+        nome = autor.get("artist_name", "N/A").strip() or "N/A"
+        nacionalidade = autor.get("artist_nacionality", "N/A").strip()
+        if not nacionalidade:
+            nacionalidade = "N/A"
 
-        if autenticado:  # Se o utilizador estiver autenticado, mostra os direitos
-            direitos = autor.get("rights_percentage", "N/A")
-        else:  # Caso contrário, escondemos a informação sensível
+        # === EXTRAÇÃO SEGURA DO ÁLBUM ===
+        album_raw = autor.get("album_title", "")
+
+        if not album_raw or album_raw.strip() in ("", "N/A", "[]"):
+            album = "Sem álbum registado"
+        else:
+            try:
+                albums_list = ast.literal_eval(album_raw.strip())
+                if isinstance(albums_list, list) and len(albums_list) > 0:
+                    primeiro = albums_list[0]
+                    if isinstance(primeiro, tuple) and len(primeiro) >= 2:
+                        album = str(primeiro[1]).strip()
+                    else:
+                        album = str(primeiro).strip()
+                else:
+                    album = "Sem álbum registado"
+            except (ValueError, SyntaxError, Exception):
+                album = "Sem álbum registado"
+
+        # === DIREITOS - PROTEGIDO CONTRA None OU VALORES INVÁLIDOS ===
+        if autenticado:
+            perc_raw = autor.get("rights_percentage")
+            try:
+                # Se for string vazia, None ou inválido → N/A
+                if perc_raw is None or str(perc_raw).strip() == "":
+                    direitos = "N/A"
+                else:
+                    perc = float(perc_raw)
+                    direitos = f"{perc:.1f}%"
+            except (ValueError, TypeError):
+                direitos = "N/A"
+        else:
             direitos = "[ACESSO RESTRITO]"
 
-        print(f"{nome:<25} | {nacionalidade:<20} | {direitos}")
+        # === NÃO REPETE ARTISTA/NACIONALIDADE ===
+        mostrar_artista = nome if nome != ultimo_artista else ""
+        mostrar_nacionalidade = nacionalidade if nacionalidade != ultima_nacionalidade else ""
 
-    print("=" * 80)
+        print(f"{mostrar_artista:<30} | {mostrar_nacionalidade:<20} | {album:<35} | {direitos}")
+
+        ultimo_artista = nome
+        ultima_nacionalidade = nacionalidade
+
+    print("=" * 90)
 
 
 def listar_albuns():  # apresenta a lista de álbuns e respetivas informações
     if not lista_albuns:
-        print("\nNenhum álbum registrado.")
+        print("\nNenhum álbum registado.")
         return
 
     print("\n--- CATÁLOGO DE ÁLBUNS ---")
