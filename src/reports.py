@@ -55,9 +55,9 @@ def gerar_relatorio(ordenar_por="autor"):
     """
 
     # Verificação de acesso
-    # if not management.realizar_login():
-    #     print("\nAcesso negado ao relatório. Palavra-passe incorreta.")
-    #     return ""
+    if not management.realizar_login():
+        print("\nAcesso negado ao relatório. Palavra-passe incorreta.")
+        return ""
 
     autores = load_autores()
     linhas = []

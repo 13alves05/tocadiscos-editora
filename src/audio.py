@@ -87,3 +87,5 @@ def reproduzir_musica(titulo_track, titulo_album=None):
 
     except Exception as e:
         return f"Erro na reprodução: {e}"
+    
+reproduzir_musica(input("Título da música para teste: "))

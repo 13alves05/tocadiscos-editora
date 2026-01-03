@@ -123,22 +123,3 @@ def gerar_relatorio_financeiro(autenticado):
     print("-" * 80)
     print(f"{'TOTAL GERAL':<49} | {total_global:>12.2f}€")
     print("=" * 80)
-
-
-# BLOCO PRINCIPAL (TESTES / MOCK)
-
-if __name__ == "__main__":
-    carregar_dados_sistema()
-
-    utilizador_logado = False
-
-    # Tentativa de acesso ao relatório sem login
-    gerar_relatorio_financeiro(utilizador_logado)
-
-    # Processo de login
-    utilizador_logado = realizar_login()
-
-    # Funcionalidades após autenticação
-    listar_autores(utilizador_logado)
-    listar_albuns()
-    gerar_relatorio_financeiro(utilizador_logado)

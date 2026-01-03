@@ -97,13 +97,8 @@ def load_musicas():
 
 def save_autores(autores):
     """Grava autores sobrescrevendo o ficheiro."""
-    with open(AUTHORS_FILE, "w", encoding="utf-8-sig", newline='') as authors_file:
-        writer = csv.DictWriter(authors_file)
-        writer.writerow(AUTHORS_HEADER)
-
-        for author_id, data in sorted(autores.items()):
-            albums_str = data['albums']
-
+    with open(AUTHORS_FILE, "w", encoding="utf-8-sig", newline='') as f:
+        writer = csv.DictWriter
         f.write("author_id,artist_name,artist_nacionality,album_title,rights_percentage,total_earned\n")
         for id_, autor in sorted(autores.items()):
             f.write(f"{id_},{autor['artist_name']},{autor['artist_nacionality']},{autor['album_title']},{autor['rights_percentage']},{autor['total_earned']}\n")
