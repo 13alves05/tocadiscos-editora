@@ -24,7 +24,7 @@ TRACKS_HEADER = ['track_id','album_id','album_title','artist_id','artist_name','
 # ====================== CARREGAMENTO SEGURO ======================
 
 def load_autores():
-    """Carrega autores, parse album_title list, valida com schema"""
+    """Carrega autores, parse album_title list"""
     autores = {}
 
     if not AUTHORS_FILE.exists():
@@ -48,7 +48,8 @@ def load_autores():
                 autores[author_id] = author
             except:
                 continue
-
+    
+    print(f"Debug: carreguei {len(autores)} álbuns")
     return autores
 
 
@@ -83,12 +84,13 @@ def load_albuns():
 
 
 def load_musicas():
-    """Carrega músicas com pandas (seguro contra NaN)."""
+    """Carrega músicas"""
     if not TRACKS_FILE.exists():
         return []
 
     df = pd.read_csv(TRACKS_FILE, encoding="utf-8-sig", keep_default_na=False)
     musicas = df.to_dict(orient="records")
+
     print(f"Debug: carreguei {len(musicas)} músicas")
     return musicas
 
@@ -96,21 +98,53 @@ def load_musicas():
 # ====================== GRAVAÇÃO SEGURA ======================
 
 def save_autores(autores):
+    if not autores:
+        print("Não existem autores para Salvar")
+        return
+
     """Grava autores sobrescrevendo o ficheiro."""
-    with open(AUTHORS_FILE, "w", encoding="utf-8-sig", newline='') as f:
-        writer = csv.DictWriter
-        f.write("author_id,artist_name,artist_nacionality,album_title,rights_percentage,total_earned\n")
-        for id_, autor in sorted(autores.items()):
-            f.write(f"{id_},{autor['artist_name']},{autor['artist_nacionality']},{autor['album_title']},{autor['rights_percentage']},{autor['total_earned']}\n")
+    with open(AUTHORS_FILE, "w", encoding="utf-8-sig", newline='') as authors_file:
+        writer = csv.DictWriter(authors_file)
+        writer.writerow(AUTHORS_HEADER)
+
+        # 'author_id','artist_name','artist_nacionality','album_title','rights_percentage','total_earned'
+        for author_id, data in sorted(autores.items()):
+            albums_str = str(data['album_title'])
+            writer.writerow([
+                author_id,
+                data['artist_name'],
+                data['artist_nacionality'],
+                albums_str,
+                data['rights_percentage'],
+                data['total_earned'],
+            ])
+
     print("Autores salvos com sucesso")
 
 
 def save_albuns(albuns):
+    if not albuns:
+        print('Não existem albuns para salvar')
+        return
+
     """Grava álbuns sobrescrevendo o ficheiro."""
-    with open(ALBUMS_FILE, "w", encoding="utf-8-sig", newline='') as f:
-        f.write("album_id,album_title,artist_name,album_genere,album_date,unites_sold,album_price,tracks\n")
-        for id_, album in sorted(albuns.items()):
-            f.write(f"{id_},{album['album_title']},{album['artist_name']},{album['album_genere']},{album['album_date']},{album['unites_sold']},{album['album_price']},{album['tracks']}\n")
+    with open(ALBUMS_FILE, "w", encoding="utf-8-sig", newline='') as albums_file:
+        writer = csv.DictWriter(albums_file)
+        writer.writerow(ALBUMS_HEADER)
+
+# 'album_id','album_title','artist_name','album_genere','album_date','unites_sold','album_price','tracks'
+        for album_id, data in sorted(albuns.items()):
+            album_tracks = str(data['tracks'])
+            writer.writerow([
+                album_id,
+                data['album_title'],
+                data['artist_name'],
+                data['album_genere'],
+                data['album_date'],
+                data['unites_sold'],
+                data['album_price'],
+                album_tracks,
+            ])
     print("Álbuns salvos com sucesso")
 
 
