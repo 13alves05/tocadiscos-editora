@@ -10,6 +10,7 @@ from pathlib import Path
 import pandas as pd
 from history import salvar_snapshot
 from BaseDados import dataSchema as dS  # Usamos os schemas de validação
+from searchEngine import build_unified_index
 
 # Caminhos dos ficheiros
 AUTHORS_FILE = Path("data/authors_table.csv")
@@ -150,7 +151,12 @@ def save_albuns(albuns):
 
 def save_musicas(musicas):
     """Grava músicas sobrescrevendo o ficheiro."""
-    pd.DataFrame(musicas).to_csv(TRACKS_FILE, index=False, encoding="utf-8-sig")
+    if not musicas:
+        print('Não existem músicas para salvar')
+        return
+
+    musicas_formatadas = pd.DataFrame(musicas) #formata as músicas no mesmo formato da tabela
+    musicas_formatadas.to_csv(TRACKS_FILE, index=False, encoding="utf-8-sig") #grava as músicas formatadas na tabela
     print("Músicas salvas com sucesso")
 
 
@@ -161,8 +167,12 @@ def adicionar_autor():
     autores = load_autores()
 
     nome = input("Nome do autor: ").strip()
-    if nome.lower() in [a["artist_name"].lower() for a in autores.values()]:
+    if nome:
         print("Autor já existe.")
+        return
+
+    if any(a['artist_name'].lower() == nome.lower() for a in autores.values()):
+        print('Autor já existe')
         return
 
     nac = input("Nacionalidade: ").strip()
@@ -172,11 +182,12 @@ def adicionar_autor():
             print("Percentagem inválida.")
             return
     except ValueError:
-        print("Valor inválido para percentagem.")
+        print("Percentagem inválida (0-100).")
         return
 
     novo_id = max(autores.keys(), default=0) + 1
-    autores[novo_id] = {
+
+    novo_autor = {
         "artist_name": nome,
         "artist_nacionality": nac,
         "album_title": [],
@@ -184,44 +195,75 @@ def adicionar_autor():
         "total_earned": 0.0
     }
 
+    try:
+        dS.authorsSchema.validate()
+    except:
+        print("Validação falhou!")
+        return
+    
+    autores[novo_id] = novo_autor
+
     salvar_snapshot(f"Adicionado autor '{nome}'")
     save_autores(autores)
+
+    build_unified_index()
     print("Autor adicionado com sucesso!")
 
 
 def remover_autor(nome):
-    """
-    Remove um autor do sistema:
-    - Remove todos os álbuns e músicas relacionados
-    - Atualiza CSV
-    - Cria snapshot no histórico
-    """
+    """Removes an author + related albums/tracks + snapshot"""
     autores = load_autores()
-
     chave = next((k for k, a in autores.items() if a["artist_name"].lower() == nome.lower()), None)
-
     if not chave:
         print("Autor não encontrado")
+        return
 
-    if input("Confirma remoção (s/n): ").lower() != "s":
+    confirm = input(f"Confirma remoção do autor '{nome}' (s/n): ").lower()
+    if confirm != 's':
         print("Operação cancelada")
+        return
 
-    # Remove autor
     del autores[chave]
 
-    # Remove álbuns do autor
+    # Cascade delete albums & tracks
     albuns = load_albuns()
-    albuns = {k: v for k, v in albuns.items() if v["artist_name"].lower() != nome.lower()}
-    save_albuns(albuns)
+    albuns_to_remove = {k for k, v in albuns.items() if v['artist_name'].lower() == nome.lower()}
+    for alb_id in albuns_to_remove:
+        del albuns[alb_id]
 
-    # Remove músicas do autor
     musicas = load_musicas()
-    musicas = [m for m in musicas if m["artist_name"].lower() != nome.lower()]
+    musicas = [m for m in musicas if m['artist_name'].lower() != nome.lower()]
+
+    salvar_snapshot(f"Removido autor '{nome}' (ID {chave}) + álbuns e faixas relacionados")
+
+    save_autores(autores)
+    save_albuns(albuns)
     save_musicas(musicas)
 
-    # Snapshot histórico
-    salvar_snapshot(f"Removido {nome}")
+    # Rebuild Whoosh index
+    build_unified_index()
+
+    print(f"Autor '{nome}' removido com sucesso")
+
+
+def atualizar_direitos_autor(nome, nova_percentagem):
+    """Updates rights_percentage for an author"""
+    autores = load_autores()
+    chave = next((k for k, a in autores.items() if a["artist_name"].lower() == nome.lower()), None)
+    if not chave:
+        print("Autor não encontrado")
+        return
+
+    try:
+        if not 0 <= nova_percentagem <= 100:
+            raise ValueError
+        autores[chave]['rights_percentage'] = nova_percentagem
+    except ValueError:
+        print("Percentagem inválida (0-100)")
+        return
+
+    salvar_snapshot(f"Atualizada percentagem de direitos de '{nome}' para {nova_percentagem}%")
     save_autores(autores)
 
-    print("Autor removido")  # print para depurar
-    return "Autor removido com sucesso"
+    build_unified_index()
+    print(f"Direitos atualizados para {nova_percentagem}%")
