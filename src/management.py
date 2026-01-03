@@ -1,28 +1,16 @@
 import csv
 
-# ============================================================
-# LISTAS GLOBAIS (dados carregados em memória)
-# ============================================================
-
-lista_admins = []      # utilizadores autorizados (login)
+lista_admins = []  # utilizadores autorizados (login)
 lista_albuns = []
 lista_autores = []
 lista_musicas = []
 
-# ============================================================
-# CARREGAMENTO DE DADOS
-# ============================================================
 
-def carregar_dados_sistema():
-    """
-    Carrega todos os dados dos ficheiros CSV para a memória.
-    Esta função deve ser chamada UMA vez no arranque da aplicação.
-    """
-
+def carregar_dados_sistema():  # carrega todos os dados dos ficheiros CSV para a memória
     global lista_admins, lista_albuns, lista_autores, lista_musicas
 
     try:
-        with open("data/users.csv", mode="r", encoding="utf-8") as f:
+        with open("data/admins.csv", mode="r", encoding="utf-8") as f:
             lista_admins = list(csv.DictReader(f))
 
         with open("data/albums_table.csv", mode="r", encoding="utf-8") as f:
@@ -36,138 +24,77 @@ def carregar_dados_sistema():
 
         print("Dados carregados para a memória.")
 
-    except FileNotFoundError as e:
-        print(f"Erro: ficheiro não encontrado -> {e.filename}")
+    except FileNotFoundError as e:  # caso algum ficheiro não exista
+        print(f"Erro: ficheiro {e.filename} não encontrado.")
 
-# ============================================================
-# AUTENTICAÇÃO
-# ============================================================
 
-def realizar_login():
-    """
-    Verifica se o utilizador tem permissões de acesso.
-    Lê de data/users.csv (username, password, role).
-    Retorna True se for admin, False caso contrário.
-    """
-
+def realizar_login():  # A função percorre a lista de administradores carregada em memória e verifica se existe uma combinação válida
     print("\n--- ACESSO RESTRITO ---")
-    username = input("Utilizador: ").strip()
-    password = input("Senha: ").strip()
+    username = input("Utilizador: ")
+    password = input("Senha: ")
 
-    for user in lista_admins:
-        if user["username"] == username and user["password"] == password:
-            if user.get("admin", "").lower() == "admin":
-                print("Acesso autorizado (ADMIN).")
-                return True
-            else:
-                print("Login efetuado, mas sem permissões de administrador.")
-                return False
+    for admin in lista_admins:
+        if admin["username"] == username and admin["password"] == password:
+            print("Acesso autorizado.")
+            return True
 
     print("Acesso negado.")
     return False
 
-# ============================================================
-# LISTAGEM DE AUTORES
-# ============================================================
 
-def listar_autores(autenticado):
-    """
-    Lista os autores representados pela editora.
-    Os direitos editoriais só são mostrados se o utilizador estiver autenticado.
-    """
-
+def listar_autores(autenticado):  # lista os autores representados pela editora
     if not lista_autores:
-        print("\nNenhum autor registado.")
+        print("\nNenhum autor registrado.")
         return
 
-    print("\n" + "=" * 100)
-
-    if autenticado:
-        print(f"{'ARTISTA':<25} | {'NACIONALIDADE':<20} | {'ÁLBUNS':<40} | {'DIREITOS'}")
-    else:
-        print(f"{'ARTISTA':<25} | {'NACIONALIDADE':<20} | {'ÁLBUNS':<40}")
-
-    print("-" * 100)
+    print("\n" + "=" * 80)
+    print(f"{"ARTISTA":<25} | {"NACIONALIDADE":<20} | {"DIREITOS"}")
+    print("-" * 80)
 
     for autor in lista_autores:
-        albuns_raw = autor.get("album_title", "")
-        albuns = albuns_raw if albuns_raw else "N/A"
+        nome = autor.get("artist_name", "N/A")
+        nacionalidade = autor.get("artist_nacionality", "N/A")
 
-        if autenticado:
-            print(
-                f"{autor['artist_name']:<25} | "
-                f"{autor['artist_nacionality']:<20} | "
-                f"{albuns:<40} | "
-                f"{autor.get('rights_percentage', 'N/A')}%"
-            )
-        else:
-            print(
-                f"{autor['artist_name']:<25} | "
-                f"{autor['artist_nacionality']:<20} | "
-                f"{albuns:<40}"
-            )
+        if autenticado:  # Se o utilizador estiver autenticado, mostra os direitos
+            direitos = autor.get("rights_percentage", "N/A")
+        else:  # Caso contrário, escondemos a informação sensível
+            direitos = "[ACESSO RESTRITO]"
 
-    print("=" * 100)
+        print(f"{nome:<25} | {nacionalidade:<20} | {direitos}")
 
-# ============================================================
-# LISTAGEM DE ÁLBUNS
-# ============================================================
+    print("=" * 80)
 
-def listar_albuns():
-    """
-    Lista os álbuns registados na editora com toda a informação pedida.
-    """
 
+def listar_albuns():  # apresenta a lista de álbuns e respetivas informações
     if not lista_albuns:
-        print("\nNenhum álbum registado.")
+        print("\nNenhum álbum registrado.")
         return
 
-    print("\n" + "=" * 120)
-
-    print(
-        f"{'ÁLBUM':<25} | {'ARTISTA':<20} | {'GÉNERO':<15} | "
-        f"{'LANÇAMENTO':<12} | {'VENDAS':<8} | {'PREÇO':<8} | {'MÚSICAS'}"
-    )
-
-    print("-" * 120)
+    print("\n--- CATÁLOGO DE ÁLBUNS ---")
 
     for alb in lista_albuns:
-        musicas = alb.get("tracks", "N/A")
+        print(f"\nÁlbum: {alb.get( "album_title ",  "Sem título ")}")
+        print(f"  Género: {alb.get( "album_genere",  "N/A")}")
+        print(f"  Data de lançamento: {alb.get( "album_date ",  "N/A ")}")
+        print(f"  Unidades vendidas: {alb.get("unites_sold", "0")}")
+        print(f"  Preço: {alb.get( "album_price",  "0.00 ")}€")
+        print(f"  Músicas: {alb.get( "tracks ",  "N/A")}")
+        print("-" * 60)
 
-        try:
-            preco = float(alb["album_price"])
-        except ValueError:
-            preco = 0.0
 
-        print(
-            f"{alb['album_title']:<25} | "
-            f"{alb['artist_name']:<20} | "
-            f"{alb['album_genere']:<15} | "
-            f"{alb.get('album_date', 'N/A'):<12} | "
-            f"{alb['unites_sold']:<8} | "
-            f"{preco:<8.2f} | "
-            f"{musicas}"
-        )
+# RELATÓRIO FINANCEIRO (ACESSO RESTRITO)
 
-    print("=" * 120)
-
-# ============================================================
-# RELATÓRIO FINANCEIRO (SIMPLIFICADO)
-# ============================================================
 
 def gerar_relatorio_financeiro(autenticado):
-    """
-    Relatório simples de direitos editoriais.
-    A versão completa está em reports.py
-    """
-
     if not autenticado:
-        print("\nAcesso negado ao relatório financeiro.")
+        print("\n Acesso negado ao relatório financeiro.")
         return
 
     print("\n" + "RELATÓRIO DE DIREITOS EDITORIAIS".center(80))
     print("-" * 80)
-    print(f"{'Autor':<20} | {'% Direitos':<12} | {'Receita (€)':<15} | {'Direitos (€)'}")
+    print(
+        f"{"Autor":<20} | {"% Direitos":<12} | {"Receita (€)":<15} | {"Direitos (€)"}"
+    )
     print("-" * 80)
 
     total_global = 0.0
@@ -175,22 +102,43 @@ def gerar_relatorio_financeiro(autenticado):
     for autor in lista_autores:
         try:
             nome = autor["artist_name"]
-            percentagem = float(autor["rights_percentage"])
-            receita = float(autor.get("total_earned", 0))
 
+            # Converte a percentagem de str para número
+            percentagem = float(autor["rights_percentage"].replace("%", ""))
+
+            # Receita usada como mock data para testes
+            receita = float(autor["total_earned"])
+
+            # Cálculo dos direitos editoriais
             direitos = receita * (percentagem / 100)
             total_global += direitos
 
             print(
-                f"{nome:<20} | "
-                f"{percentagem:>10.1f}% | "
-                f"{receita:>13.2f}€ | "
-                f"{direitos:>12.2f}€"
+                f"{nome:<20} | {percentagem:>10.1f}% | {receita:>13.2f}€ | {direitos:>12.2f}€"
             )
 
-        except (KeyError, ValueError):
+        except (KeyError, ValueError):  # Ignora entradas inválidas
             continue
 
     print("-" * 80)
     print(f"{'TOTAL GERAL':<49} | {total_global:>12.2f}€")
     print("=" * 80)
+
+
+# BLOCO PRINCIPAL (TESTES / MOCK)
+
+if __name__ == "__main__":
+    carregar_dados_sistema()
+
+    utilizador_logado = False
+
+    # Tentativa de acesso ao relatório sem login
+    gerar_relatorio_financeiro(utilizador_logado)
+
+    # Processo de login
+    utilizador_logado = realizar_login()
+
+    # Funcionalidades após autenticação
+    listar_autores(utilizador_logado)
+    listar_albuns()
+    gerar_relatorio_financeiro(utilizador_logado)
