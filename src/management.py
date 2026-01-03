@@ -42,9 +42,6 @@ def realizar_login():  # A função percorre a lista de administradores carregad
     print("Acesso negado.")
     return False
 
-
-import ast  # Certifica-te que esta linha está no topo do management.py
-
 def listar_autores(autenticado):
     if not lista_autores:
         print("\nNenhum autor registrado.")
@@ -82,7 +79,7 @@ def listar_autores(autenticado):
             except (ValueError, SyntaxError, Exception):
                 album = "Sem álbum registrado"
 
-        # === DIREITOS - AGORA PROTEGIDO CONTRA None OU VALORES INVÁLIDOS ===
+        # === DIREITOS - PROTEGIDO CONTRA None OU VALORES INVÁLIDOS ===
         if autenticado:
             perc_raw = autor.get("rights_percentage")
             try:
@@ -97,7 +94,7 @@ def listar_autores(autenticado):
         else:
             direitos = "[ACESSO RESTRITO]"
 
-        # === NÃO REPETIR ARTISTA/NACIONALIDADE ===
+        # === NÃO REPETE ARTISTA/NACIONALIDADE ===
         mostrar_artista = nome if nome != ultimo_artista else ""
         mostrar_nacionalidade = nacionalidade if nacionalidade != ultima_nacionalidade else ""
 
