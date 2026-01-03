@@ -67,12 +67,12 @@ def main():
             while True:
                 escolha_menu_administrador = menu.menu_administrador()
                 if escolha_menu_administrador == "1":
-                    autor = input("Autor: ")
+                    autor = { "artist_name": input("Autor: ")}
                     reports.calcular_direitos_por_autor(autor)
                     
                 elif escolha_menu_administrador == "2":
-                    autor = input("Autor: ")
-                    reports.gerar_relatorio(autor)
+                    # autor = input("Autor: ")
+                    reports.gerar_relatorio()
                 
                 elif escolha_menu_administrador == "3":
                     crud.adicionar_autor()
@@ -85,23 +85,30 @@ def main():
                     break
         
         elif escolha_menu_principal == "3":
-            audio.init_audio()  # inicializa o mixer do pygame
-            musica_selecionada = None
-
             while True:
                 escolha_menu_player = menu.menu_player()
 
                 if escolha_menu_player == "1":
-                    musica_selecionada = input("Título da música: ").strip()
-                    print(f"Música selecionada: {musica_selecionada}")
-
+                    audio.init_audio()
+                    musica = input("Qual música deseja buscar: ")
+                    caminho_musica = audio.encontrar_caminho_musica(musica)
+                    audio.play_music(caminho_musica)
+                
                 elif escolha_menu_player == "2":
-                    if musica_selecionada:
-                        resultado = audio.reproduzir_musica(musica_selecionada)
-                        if resultado:
-                            print(resultado)
-                    else:
-                        print("Nenhuma música selecionada.")
+                    audio.pause_music()
+                    print("\nMúsica pausada")
+
+                elif escolha_menu_player == "3":
+                    audio.resume_music()
+                    print("\nMúsica retomada")
+
+                elif escolha_menu_player == "4":
+                    audio.stop_music()
+                    print("\nMúsica parada")
+
+                elif escolha_menu_player == "0":
+                    audio.stop_music()
+                    break
 
                 elif escolha_menu_player == "0":
                     break  # volta ao menu principal

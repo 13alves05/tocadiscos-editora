@@ -4,88 +4,53 @@ Usa getAudioPath(track_id) para construir caminhos,
 load_musicas() para obter metadados,
 e pygame para reprodução de áudio.
 """
-
-import os
 import pygame
-from crud import load_musicas
+import crud
+import os
 from BaseDados.getAudioPath import getAudioPath
 
-# Estado global do áudio
-_audio_inicializado = False
-
-
-def init_audio():
-    """Inicializa o sistema de áudio (apenas uma vez)."""
-    global _audio_inicializado
-    if not _audio_inicializado:
-        pygame.init()
-        pygame.mixer.init()
-        _audio_inicializado = True
-
-
 def encontrar_caminho_musica(titulo_track, titulo_album=None):
-    """
-    Procura o caminho do ficheiro de áudio a partir do título da música.
-    Pode opcionalmente filtrar por álbum.
-    """
-    musicas = load_musicas()
+    
+    "Procura o caminho do ficheiro de áudio a partir do título da música. Pode opcionalmente filtrar por álbum."
+    musicas = crud.load_musicas()
+
+    encontrou_no_csv = False
 
     for m in musicas:
-        if m["track_title"].lower() == titulo_track.lower():
-            if not titulo_album or m["album_title"].lower() == titulo_album.lower():
+        if m["track_title"].strip().lower() == titulo_track.strip().lower():
+            if not titulo_album or m["album_title"].strip().lower() == titulo_album.strip().lower():
                 caminho = getAudioPath(m["track_id"]) + ".mp3"
+                encontrou_no_csv = True
 
                 if os.path.exists(caminho):
                     return caminho
                 else:
-                    print(f"Debug: ficheiro não encontrado -> {caminho}")
-
-    return None
-
-
-def reproduzir_musica(titulo_track, titulo_album=None):
-    """
-    Reproduz uma música via terminal.
-    Controlo:
-      ENTER -> pausa/retoma
-      s     -> parar
-      q     -> sair
-    """
-    init_audio()
-
-    caminho = encontrar_caminho_musica(titulo_track, titulo_album)
-    if not caminho:
-        return "Música não encontrada ou ficheiro inexistente."
-
-    try:
-        pygame.mixer.music.load(caminho)
-        pygame.mixer.music.play()
-
-        print(f"\nA reproduzir: {titulo_track}")
-        print("ENTER = pausa/retomar | s = parar | q = sair")
-
-        pausado = False
-
-        while True:
-            comando = input().strip().lower()
-
-            if comando == "":
-                if pausado:
-                    pygame.mixer.music.unpause()
-                    pausado = False
-                else:
-                    pygame.mixer.music.pause()
-                    pausado = True
-
-            elif comando == "s":
-                pygame.mixer.music.stop()
-                break
-
-            elif comando == "q":
-                pygame.mixer.music.stop()
-                return "Reprodução terminada."
-
-    except Exception as e:
-        return f"Erro na reprodução: {e}"
+                    print("Esta música não está adicionada.")
     
-reproduzir_musica(input("Título da música para teste: "))
+    if not encontrou_no_csv:
+        print("Música não existe.")
+
+    return
+
+def init_audio():
+    if not pygame.mixer.get_init():
+        pygame.mixer.init()
+
+def play_music(path):
+    try:
+        pygame.mixer.music.load(path)
+        pygame.mixer.music.play()
+    except:
+        print("Não foi possível tocar a música.")
+
+def pause_music():
+    pygame.mixer.music.pause()
+
+def resume_music():
+    pygame.mixer.music.unpause()
+
+def stop_music():
+    pygame.mixer.music.stop()
+
+def is_playing():
+    return pygame.mixer.music.get_busy()
