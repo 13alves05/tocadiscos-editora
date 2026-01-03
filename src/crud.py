@@ -45,8 +45,16 @@ def load_autores():
                         albums_list = []
                 except:
                     albums_list = []
-            
-                autores[author_id] = author
+
+                data = {
+                    'artist_name': author['artist_name'].strip(),
+                    'artist_nacionality': author['artist_nacionality'].strip(),
+                    'album_title': albums_list,
+                    'rights_percentage': float(author.get('rights_percentage', 0)),
+                    'total_earned': float(author.get('total_earned', 0.0))
+                }
+
+                autores[author_id] = data
             except:
                 continue
     
@@ -75,7 +83,18 @@ def load_albuns():
                 except:
                     album['tracks'] = []
                 
-                albuns[album_id] = tracks_list
+                data = {
+                    'album_title': album['album_title'].strip(),
+                    'artist_name': album['artist_name'].strip(),
+                    'album_genere': album['album_genere'].strip(),
+                    'album_date': album['album_date'].strip(),
+                    'unites_sold': int(album.get('unites_sold', 0)),
+                    'album_price': float(album.get('album_price', 0.0)),
+                    'tracks': tracks_list
+                }
+                
+                # dS.albumsSchema.validate(data)
+                albuns[album_id] = data
 
             except:
                 continue

@@ -24,21 +24,28 @@ def calcular_direitos_por_autor(autor):
     todos_albuns = load_albuns()
 
     # Filtra apenas os álbuns do autor atual
-    albuns_autor = [
+    autor_albuns = [
         alb for alb in todos_albuns.values()
-        if alb["artist_name"].lower() == autor["artist_name"].lower()
+        if alb["artist_name"].lower() == autor.lower()
     ]
 
-    num_albuns = len(albuns_autor)
+    num_albuns = len(autor_albuns)
 
-    unidades_total = sum(int(alb["unites_sold"]) for alb in albuns_autor)
+    unidades_total = sum(int(alb["unites_sold"]) for alb in autor_albuns)
 
     receita_total = sum(
         int(alb["unites_sold"]) * float(alb["album_price"])
-        for alb in albuns_autor
+        for alb in autor_albuns
     )
 
-    direitos_total = receita_total * (float(autor["rights_percentage"]) / 100)
+    autores = load_autores()
+    autor_rights_percentage = 0 
+
+    for autor_entry in autores.values():
+        if autor_entry['artist_name'].lower() == autor.lower():
+            autor_rights_percentage = autor_entry["rights_percentage"]
+
+    direitos_total = receita_total * (float(autor_rights_percentage) / 100)
 
     return {
         "num_albuns": num_albuns,
