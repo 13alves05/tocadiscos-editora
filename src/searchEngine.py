@@ -38,6 +38,7 @@ def build_unified_index(
     authors_file="data/authors_table.csv"
 ):
     """Constrói o índice de busca unificado Whoosh a partir dos três ficheiros CSV"""
+    print("Inicializando o programa.")
     
     # Limpa e recria o diretório do índice
     if os.path.exists(INDEX_DIR):
@@ -55,7 +56,7 @@ def build_unified_index(
             reader = csv.DictReader(f)
             # Remove BOM e espaços dos nomes dos campos manualmente
             reader.fieldnames = [name.lstrip('\ufeff').strip() for name in reader.fieldnames]
-            print(f"Indexando tracks — colunas: {reader.fieldnames}")
+            # print(f"Indexando tracks — colunas: {reader.fieldnames}")
 
             for row in reader:
                 # Colunas duplicadas: usa a primeira (são idênticas)
@@ -83,7 +84,7 @@ def build_unified_index(
         with open(albums_file, newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             reader.fieldnames = [name.lstrip('\ufeff').strip() for name in reader.fieldnames]
-            print(f"Indexando álbuns — colunas: {reader.fieldnames}")
+            # print(f"Indexando álbuns — colunas: {reader.fieldnames}")
 
             for row in reader:
                 writer.add_document(
@@ -109,7 +110,7 @@ def build_unified_index(
         with open(authors_file, newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             reader.fieldnames = [name.lstrip('\ufeff').strip() for name in reader.fieldnames]
-            print(f"Indexando autores — colunas: {reader.fieldnames}")
+            # print(f"Indexando autores — colunas: {reader.fieldnames}")
 
             for row in reader:
                 # Lista de álbuns como string para armazenar
@@ -133,7 +134,8 @@ def build_unified_index(
 
     # Finaliza o índice
     writer.commit()
-    print(f"\nÍndice de busca unificado construído com sucesso com {total_docs} itens (tracks + álbuns + autores)!")
+    # print(f"\nÍndice de busca unificado construído com sucesso com {total_docs} itens (tracks + álbuns + autores)!")
+    print("\nPrograma inicializado com sucesso\n")
 
 def search(query_str, limit=20, filter_type=None):
     """Pesquisa em tracks, álbuns e autores"""
