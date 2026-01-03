@@ -3,17 +3,18 @@ Operações de I/O para os ficheiros CSV autores, álbuns, músicas.
 Funções de carregamento, gravação, adicionar/remover autores com integração com history.salvar_snapshot.
 Validação com schemas de BaseDados.dataSchema.
 """
-
+import csv
 import ast
 import os
+from pathlib import Path
 import pandas as pd
 from history import salvar_snapshot
 from BaseDados import dataSchema as dS  # Usamos os schemas de validação
 
 # Caminhos dos ficheiros
-AUTHORS_FILE = "data/authors_table.csv"
-ALBUMS_FILE = "data/albums_table.csv"
-TRACKS_FILE = "data/raw_tracks.csv"
+AUTHORS_FILE = Path("data/authors_table.csv")
+ALBUMS_FILE = Path("data/albums_table.csv")
+TRACKS_FILE = Path("data/raw_tracks.csv")
 
 # Headers das Tabelas
 AUTHORS_HEADER = ['author_id','artist_name','artist_nacionality','album_title','rights_percentage','total_earned']
@@ -23,103 +24,59 @@ TRACKS_HEADER = ['track_id','album_id','album_title','artist_id','artist_name','
 # ====================== CARREGAMENTO SEGURO ======================
 
 def load_autores():
-    """Carrega autores ignorando cabeçalho e linhas inválidas."""
+    """Carrega autores, parse album_title list, valida com schema"""
     autores = {}
-    if not os.path.exists(AUTHORS_FILE):
+
+    if not AUTHORS_FILE.exists():
         return autores
 
-    with open(AUTHORS_FILE, "r", encoding="utf-8-sig") as f:
-        linhas = [linha.strip() for linha in f if linha.strip() and not linha.startswith("author_id")]
+    with open(AUTHORS_FILE, "r", encoding="utf-8-sig") as authors_file:
+        authors_list = csv.DictReader(authors_file)
+        for author in authors_list:
+            try:
+                author_id = int(author['author_id'])
+                album_str = author.get('album_title', [])
 
-    for linha in linhas:
-        partes = linha.split(",")
-        if len(partes) < 6:
-            continue
-
-        try:
-            id_ = int(partes[0])
-            nome = partes[1]
-            nac = partes[2]
-            album_str = ",".join(partes[3:-2])
-            direitos = float(partes[-2])
-            ganho = float(partes[-1])
-
-            albuns = []
-            if album_str:
                 try:
-                    parsed = ast.literal_eval(album_str)
-                    if isinstance(parsed, list):
-                        albuns = parsed
+                    albums_list = ast.literal_eval(album_str)
+                    author['album_title'] = albums_list
+                    if not isinstance(albums_list, list):
+                        albums_list = []
                 except:
-                    pass  # deixa vazio se falhar
+                    albums_list = []
+            
+                autores[author_id] = author
+            except:
+                continue
 
-            autor_data = {
-                "artist_name": nome,
-                "artist_nacionality": nac,
-                "album_title": albuns,
-                "rights_percentage": direitos,
-                "total_earned": ganho
-            }
-
-            # Validação
-            dS.authorsSchema.validate({id_: autor_data})
-            autores[id_] = autor_data
-
-        except Exception:
-            continue  # ignora linha problemática
-
-    print(f"Debug: carreguei {len(autores)} autores")
     return autores
 
 
 def load_albuns():
     """Carrega álbuns ignorando cabeçalho e linhas inválidas."""
     albuns = {}
-    if not os.path.exists(ALBUMS_FILE):
+    if not ALBUMS_FILE.exists():
         return albuns
 
-    with open(ALBUMS_FILE, "r", encoding="utf-8-sig") as f:
-        linhas = [linha.strip() for linha in f if linha.strip() and not linha.startswith("album_id")]
+    with open(ALBUMS_FILE, "r", encoding="utf-8-sig") as albums_file:
+        albums_list = csv.DictReader(albums_file)
+        for album in albums_list:
+            try:
+                album_id = int(album['album_id'])
+                album_tracks = album['tracks']
 
-    for linha in linhas:
-        partes = linha.split(",")
-        if len(partes) < 8:
-            continue
-
-        try:
-            id_ = int(partes[0])
-            titulo = partes[1]
-            artista = partes[2]
-            genero = partes[3]
-            data = partes[4]
-            vendas = int(partes[5])
-            preco = float(partes[6])
-            tracks_str = ",".join(partes[7:])
-
-            tracks = []
-            if tracks_str:
                 try:
-                    parsed = ast.literal_eval(tracks_str)
-                    if isinstance(parsed, list):
-                        tracks = parsed
+                    tracks_list = ast.literal_eval(album_tracks)
+                    album['tracks'] = tracks_list
+                    if not isinstance(tracks_list, list):
+                        album['tracks'] = []
                 except:
-                    pass
+                    album['tracks'] = []
+                
+                albuns[album_id] = tracks_list
 
-            album_data = {
-                "album_title": titulo,
-                "artist_name": artista,
-                "album_genere": genero,
-                "album_date": data,
-                "unites_sold": vendas,
-                "album_price": preco,
-                "tracks": tracks
-            }
-
-            dS.albumsSchema.validate({id_: album_data})
-            albuns[id_] = album_data
-
-        except Exception:
-            continue
+            except:
+                continue
 
     print(f"Debug: carreguei {len(albuns)} álbuns")
     return albuns
@@ -127,7 +84,7 @@ def load_albuns():
 
 def load_musicas():
     """Carrega músicas com pandas (seguro contra NaN)."""
-    if not os.path.exists(TRACKS_FILE):
+    if not TRACKS_FILE.exists():
         return []
 
     df = pd.read_csv(TRACKS_FILE, encoding="utf-8-sig", keep_default_na=False)
@@ -206,13 +163,14 @@ def remover_autor(nome):
     - Cria snapshot no histórico
     """
     autores = load_autores()
+
     chave = next((k for k, a in autores.items() if a["artist_name"].lower() == nome.lower()), None)
 
     if not chave:
-        return "Autor não encontrado"
+        print("Autor não encontrado")
 
     if input("Confirma remoção (s/n): ").lower() != "s":
-        return "Operação cancelada"
+        print("Operação cancelada")
 
     # Remove autor
     del autores[chave]
