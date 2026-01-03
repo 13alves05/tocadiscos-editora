@@ -156,3 +156,13 @@ def search(query_str, limit=20, filter_type=None):
         # hits.sort(key=lambda x: x.get('score', 0), reverse=True)
         
         return hits
+
+build_unified_index()
+
+import ast    
+
+resultados = search('awol', limit=20, filter_type='album')
+album_tracks = resultados[0]['track_list']
+track_list = ast.literal_eval(album_tracks)
+
+print(track_list)

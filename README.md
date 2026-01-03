@@ -2,6 +2,9 @@
 
 Projeto de Gestão de Discografia - 2025
 
+# Versão do pyhton a utilizar
+3.13
+
 # Dependências a instalar
 pip install pygame tabulate schema whoosh pandas ou pip install -r requirements.txtpip install -r requirements.txt
 
