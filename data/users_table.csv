@@ -1,0 +1,6 @@
+id,username,password,role
+1,admin,admin,admin
+2,bruno,bruno,user
+3,gabriela,gabi,user
+4,leonardo,leonardo,user
+5,vinicius,vinicius,user
