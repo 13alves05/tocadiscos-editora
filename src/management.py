@@ -1,5 +1,6 @@
 import csv
 import ast
+from tabulate import tabulate
 
 lista_admins = []  # utilizadores autorizados (login)
 lista_albuns = []
@@ -131,13 +132,6 @@ def gerar_relatorio_financeiro(autenticado):
         print("\n Acesso negado ao relatório financeiro.")
         return
 
-    print("\n" + "RELATÓRIO DE DIREITOS EDITORIAIS".center(80))
-    print("-" * 80)
-    print(
-        f"{"Autor":<20} | {"% Direitos":<12} | {"Receita (€)":<15} | {"Direitos (€)"}"
-    )
-    print("-" * 80)
-
     total_global = 0.0
     receita_total = 0.0
     unidades_totais = 0
@@ -145,6 +139,7 @@ def gerar_relatorio_financeiro(autenticado):
 
     unidades_por_autor = {}
     albuns_por_autor = {}
+    dados = []
 
     for album in lista_albuns:
         try:
@@ -176,14 +171,23 @@ def gerar_relatorio_financeiro(autenticado):
             direitos = receita * (percentagem / 100)
             receita_total += receita
             total_global += direitos
-
-            print(
-                f"{nome:<20} | {percentagem:>10.1f}% | {num_albuns:>10} | {unidades:>10} | {receita:>13.2f}€ | {direitos:>12.2f}€"
-            )
+            def truncate(text, max_len=40):
+                text = str(text)
+                return text if len(text) <= max_len else text[:max_len-3] + "..."
+            dados.append({"Autor":truncate(nome, 40),
+                     "% Direitos":percentagem,
+                     "Nº Albuns":num_albuns,
+                     "Unid. Vendidas":unidades,
+                     "Receita (€)":f"{receita:.2f} €",
+                     "Direitos (€)":f"{direitos:.2f} €",})
 
         except (KeyError, ValueError, AttributeError):  # Ignora entradas inválidas
             continue
-
-    print("-" * 80)
-    print(f"{'TOTAL GERAL':<49} | {albuns_totais:>12} | {unidades_totais:>12} | {receita_total:>13.2f}€ | {total_global:>12.2f}€")
-    print("=" * 80)
+    dados.append({
+        "Autor":"TOTAL",
+        "% Direitos":"",
+        "Nº Albuns":albuns_totais,
+        "Unid. Vendidas":unidades_totais,
+        "Receita (€)":f"{receita_total:.2f} €",
+        "Direitos (€)":f"{total_global:.2f} €"})
+    print(tabulate(dados, headers="keys", tablefmt="rst", numalign="right", colalign="right", floatfmt=".2f"))
