@@ -2,6 +2,7 @@
 
 **Projeto Académico – Gestão de Catálogo Musical**  
 **Unidade Curricular:** Algoritmos e Programação  
+**Curso:** Desenvolvimento de Software  
 **Ano Letivo:** 2025/2026  
 
 Aplicação em linha de comandos (CLI) desenvolvida para a editora musical fictícia **Tocadiscos**, com o objetivo de apoiar a gestão de **autores, álbuns e músicas**, cálculo automático de **direitos editoriais**, pesquisa de conteúdos, reprodução de áudio e controlo de histórico de alterações.
@@ -22,7 +23,7 @@ Projeto desenvolvido por:
 
 ## 🎯 Objetivos do Projeto
 
-Conforme o enunciado do Trabalho Prático:
+Conforme o enunciado do Trabalho Prático (ver imagem anexa ou ficheiro `Enunciado Trabalho Pratico.pdf`):
 
 - Implementar uma aplicação com menu navegável em linha de comandos.
 - Gerir autores, álbuns e músicas de uma editora musical.
@@ -86,7 +87,7 @@ tocadiscos-editora/
 │   ├── reports.py               # Relatórios financeiros
 │   └── searchEngine.py          # Indexação e pesquisa (Whoosh)
 ├── requirements.txt
-├── LICENSE                      # MIT License
+├── LICENSE                      # MIT License (2025 Toca Discos Editora)
 ├── Enunciado Trabalho Pratico.pdf
 ├── Planeamento-pt-pt.txt
 └── README.md                    # Este ficheiro
@@ -141,7 +142,7 @@ pip install -r requirements.txt
 - Criar a pasta `data/songs/`
 - Colocar ficheiros `.mp3` organizados por ID da faixa  
   (exemplo: track_id 2 → `data/songs/000/000002.mp3`)
-- Para teste rápido: no menu Player → 1, escreva **Food** (música de exemplo do dataset)
+- **Dica de teste rápido:** No menu Player → 1, escreva **Food** (música de exemplo presente no dataset)
 
 ### 4. Executar a aplicação
 ```bash
