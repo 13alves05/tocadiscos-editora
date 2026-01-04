@@ -7,6 +7,7 @@ def getAudioPath(track_id):
         for x in range(missing):
             track_id = '0' + track_id
 
-    path += track_id[0:3] + '/' + track_id[3:len(track_id)]
+    path += track_id[0:3] + '/' + track_id[0:len(track_id)]
+
 
     return path
