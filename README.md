@@ -159,4 +159,5 @@ python src/main.py
 
 **Repositório GitHub:** https://github.com/13alves05/tocadiscos-editora
 
-**Obrigado pela avaliação e bom exame!**
+**Obrigado**
+
