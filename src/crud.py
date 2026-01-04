@@ -22,11 +22,15 @@ AUTHORS_HEADER = ['author_id','artist_name','artist_nacionality','album_title','
 ALBUMS_HEADER = ['album_id','album_title','artist_name','album_genere','album_date','unites_sold','album_price','tracks']
 TRACKS_HEADER = ['track_id','album_id','album_title','artist_id','artist_name','track_date_recorded','track_genres','track_interest','track_number','track_title','artist_nacionality','track_price','artist_nacionality','track_price']
 
+# ====================== LOADED DATA ======================
+autores = {}
+albuns = {}
+
 # ====================== CARREGAMENTO SEGURO ======================
 
 def load_autores():
     """Carrega autores, parse album_title list"""
-    autores = {}
+    
 
     if not AUTHORS_FILE.exists():
         return autores
@@ -58,13 +62,13 @@ def load_autores():
             except:
                 continue
     
-    print(f"Debug: carreguei {len(autores)} álbuns")
+    print(f"Debug: carreguei {len(autores)} autores")
     return autores
 
 
 def load_albuns():
     """Carrega álbuns ignorando cabeçalho e linhas inválidas."""
-    albuns = {}
+    
     if not ALBUMS_FILE.exists():
         return albuns
 

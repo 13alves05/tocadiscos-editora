@@ -6,11 +6,16 @@ import reports
 import audio
 import ast
 from searchEngine import search, build_unified_index
+from crud import load_autores, load_albuns
 
 build_unified_index()
 management.carregar_dados_sistema()
 
 def main():
+    #carrega dados em memória apenas 1 vez
+    load_autores()
+    load_albuns()
+
     while True:
         escolha_menu_principal = menu.menu_principal()
 
@@ -68,11 +73,10 @@ def main():
                 escolha_menu_administrador = menu.menu_administrador()
                 if escolha_menu_administrador == "1":
                     autor = input("Autor: ")
-                    reports.calcular_direitos_por_autor(autor)
+                    reports.gerar_relatorio_autor(autor)
                     
                 elif escolha_menu_administrador == "2":
-                    autor = input("Autor: ")
-                    reports.gerar_relatorio(autor)
+                    reports.gerar_relatorio()
                 
                 elif escolha_menu_administrador == "3":
                     crud.adicionar_autor()
@@ -126,3 +130,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
