@@ -41,11 +41,13 @@ def menu_administrador():
         print("Opção inválida. Tente novamente.")
 
 def menu_player():
-    opcoes_validas = {"1", "2", "0"}
+    opcoes_validas = {"1", "2","3","4", "0"}
     while True:
         print("\n--- MENU PLAYER ---")
-        print("1 - Selecionar música")
-        print("2 - Reproduzir música")
+        print("1 - Iniciar música")
+        print("2 - Pausar")
+        print("3 - Continuar")
+        print("4 - Parar")
         print("0 - Voltar")
         escolha = input("Opção: ").strip()
         if escolha in opcoes_validas:
