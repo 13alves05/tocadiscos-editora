@@ -139,6 +139,23 @@ def gerar_relatorio_financeiro(autenticado):
     print("-" * 80)
 
     total_global = 0.0
+    receita_total = 0.0
+    unidades_totais = 0
+    albuns_totais = 0
+
+    unidades_por_autor = {}
+    albuns_por_autor = {}
+
+    for album in lista_albuns:
+        try:
+            autor = album["artist_name"]
+            unidades = int(album["unites_sold"])
+            unidades_totais += unidades
+            albuns_por_autor.setdefault(autor, set()).add(album["album_title"])
+            unidades_por_autor[autor] = unidades_por_autor.get(autor, 0) + unidades
+
+        except (KeyError, ValueError, TypeError):
+            continue
 
     for autor in lista_autores:
         try:
@@ -150,17 +167,23 @@ def gerar_relatorio_financeiro(autenticado):
             # Receita usada como mock data para testes
             receita = float(autor["total_earned"])
 
+            
+            num_albuns = len(albuns_por_autor.get(nome, set()))
+            unidades = unidades_por_autor.get(nome, 0)
+            albuns_totais += num_albuns
+
             # Cálculo dos direitos editoriais
             direitos = receita * (percentagem / 100)
+            receita_total += receita
             total_global += direitos
 
             print(
-                f"{nome:<20} | {percentagem:>10.1f}% | {receita:>13.2f}€ | {direitos:>12.2f}€"
+                f"{nome:<20} | {percentagem:>10.1f}% | {num_albuns:>10} | {unidades:>10} | {receita:>13.2f}€ | {direitos:>12.2f}€"
             )
 
-        except (KeyError, ValueError):  # Ignora entradas inválidas
+        except (KeyError, ValueError, AttributeError):  # Ignora entradas inválidas
             continue
 
     print("-" * 80)
-    print(f"{'TOTAL GERAL':<49} | {total_global:>12.2f}€")
+    print(f"{'TOTAL GERAL':<49} | {albuns_totais:>12} | {unidades_totais:>12} | {receita_total:>13.2f}€ | {total_global:>12.2f}€")
     print("=" * 80)

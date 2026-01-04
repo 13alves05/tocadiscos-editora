@@ -4,9 +4,11 @@ Usa getAudioPath(track_id) para construir caminhos,
 load_musicas() para obter metadados,
 e pygame para reprodução de áudio.
 """
+
+import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import pygame
 import crud
-import os
 from BaseDados.getAudioPath import getAudioPath
 
 def encontrar_caminho_musica(titulo_track, titulo_album=None):

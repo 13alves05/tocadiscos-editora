@@ -6,16 +6,11 @@ import reports
 import audio
 import ast
 from searchEngine import search, build_unified_index
-from crud import load_autores, load_albuns
 
 build_unified_index()
 management.carregar_dados_sistema()
 
 def main():
-    #carrega dados em memória apenas 1 vez
-    load_autores()
-    load_albuns()
-
     while True:
         escolha_menu_principal = menu.menu_principal()
 
@@ -72,11 +67,11 @@ def main():
             while True:
                 escolha_menu_administrador = menu.menu_administrador()
                 if escolha_menu_administrador == "1":
-                    autor = input("Autor: ")
-                    reports.gerar_relatorio_autor(autor)
+                    autor = { "artist_name": input("Autor: ")}
+                    reports.calcular_direitos_por_autor(autor)
                     
                 elif escolha_menu_administrador == "2":
-                    reports.gerar_relatorio()
+                    management.gerar_relatorio_financeiro(autorizado)
                 
                 elif escolha_menu_administrador == "3":
                     crud.adicionar_autor()
@@ -122,7 +117,7 @@ def main():
             while True:
                 escolha_menu_historico = menu.menu_historico()
                 if escolha_menu_historico == "1":
-                    history.ver_historico()
+                    print(history.ver_historico())
                     
                 elif escolha_menu_historico == "2":
                     nome = input("Nome do snapshot para reverter: ")
@@ -137,4 +132,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
