@@ -8,7 +8,7 @@ A solução mais simples e que funciona sempre é usar funções auxiliares que 
 a conversão e a validação juntas. Assim o código fica limpo e o type checker cala-se.
 """
 
-from schema import Schema, And
+from schema import Schema, And, Use
 import re
 
 # ====================== FUNÇÕES AUXILIARES DE VALIDAÇÃO ======================
@@ -87,9 +87,9 @@ authorsSchema = Schema(
         int: {
             'artist_name': non_empty_str,
             'artist_nacionality': non_empty_str,
-            'album_title': And(list, len),  # lista não vazia de álbuns
-            'rights_percentage': And(positive_int, lambda x: 10 <= x <= 50),
-            'total_earned': non_negative_float,
+            'album_title': list,
+            'rights_percentage': And((float), lambda x: 0 <= x <= 100),
+            'total_earned': And(float, lambda x: x >= 0),
         }
     }
 )

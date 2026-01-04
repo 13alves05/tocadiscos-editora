@@ -8,7 +8,8 @@ lista_autores = []
 lista_musicas = []
 
 
-def carregar_dados_sistema():  # carrega todos os dados dos ficheiros CSV para a memória
+def carregar_dados_sistema():
+    """Carrega todos os dados dos ficheiros CSV para a memória."""
     global lista_admins, lista_albuns, lista_autores, lista_musicas
 
     try:
@@ -30,7 +31,10 @@ def carregar_dados_sistema():  # carrega todos os dados dos ficheiros CSV para a
         print(f"Erro: ficheiro {e.filename} não encontrado.")
 
 
-def realizar_login():  # A função percorre a lista de administradores carregada em memória e verifica se existe uma combinação válida
+def realizar_login():
+    """Verifica as credenciais na lista de administradores
+    carregada em memória.
+    """
     print("\n--- ACESSO RESTRITO ---")
     username = input("Utilizador: ")
     password = input("Senha: ")
@@ -43,13 +47,19 @@ def realizar_login():  # A função percorre a lista de administradores carregad
     print("Acesso negado.")
     return False
 
+
 def listar_autores(autenticado):
     if not lista_autores:
         print("\nNenhum autor registado.")
         return
 
-    print("\n" + "=" * 90)
-    print(f"{"ARTISTA":<30} | {"NACIONALIDADE":<20} | {"ÁLBUM":<35} | {"DIREITOS"}")
+    print()
+    print("=" * 90)
+    header = (
+        f"{'ARTISTA':<30} | {'NACIONALIDADE':<20} | "
+        f"{'ÁLBUM':<35} | {'DIREITOS'}"
+    )
+    print(header)
     print("-" * 90)
 
     ultimo_artista = None
@@ -97,9 +107,16 @@ def listar_autores(autenticado):
 
         # === NÃO REPETE ARTISTA/NACIONALIDADE ===
         mostrar_artista = nome if nome != ultimo_artista else ""
-        mostrar_nacionalidade = nacionalidade if nacionalidade != ultima_nacionalidade else ""
+        if nacionalidade != ultima_nacionalidade:
+            mostrar_nacionalidade = nacionalidade
+        else:
+            mostrar_nacionalidade = ""
 
-        print(f"{mostrar_artista:<30} | {mostrar_nacionalidade:<20} | {album:<35} | {direitos}")
+        formatted_line = (
+            f"{mostrar_artista:<30} | {mostrar_nacionalidade:<20} | "
+            f"{album:<35} | {direitos}"
+        )
+        print(formatted_line)
 
         ultimo_artista = nome
         ultima_nacionalidade = nacionalidade
@@ -115,12 +132,23 @@ def listar_albuns():  # apresenta a lista de álbuns e respetivas informações
     print("\n--- CATÁLOGO DE ÁLBUNS ---")
 
     for alb in lista_albuns:
-        print(f"\nÁlbum: {alb.get( "album_title ",  "Sem título ")}")
-        print(f"  Género: {alb.get( "album_genere",  "N/A")}")
-        print(f"  Data de lançamento: {alb.get( "album_date ",  "N/A ")}")
-        print(f"  Unidades vendidas: {alb.get("unites_sold", "0")}")
-        print(f"  Preço: {alb.get( "album_price",  "0.00 ")}€")
-        print(f"  Músicas: {alb.get( "tracks ",  "N/A")}")
+        title = alb.get("album_title", "Sem título")
+        genero = alb.get("album_genere", "N/A")
+        data_lanc = alb.get("album_date", "N/A")
+        unidades_vend = alb.get("unites_sold", "0")
+        preco = alb.get("album_price", "0.00")
+        tracks = alb.get("tracks", "N/A")
+
+        print("\nÁlbum: {}".format(title))
+        print("  Género: {}".format(genero))
+        print(
+            "  Data de lançamento: {}".format(data_lanc)
+        )
+        print(
+            "  Unidades vendidas: {}".format(unidades_vend)
+        )
+        print("  Preço: {}€".format(preco))
+        print("  Músicas: {}".format(tracks))
         print("-" * 60)
 
 
@@ -141,13 +169,21 @@ def gerar_relatorio_financeiro(autenticado):
     albuns_por_autor = {}
     dados = []
 
+    def truncate(text, max_len=40):
+        text = str(text)
+        return text if len(text) <= max_len else text[:max_len - 3] + "..."
+
     for album in lista_albuns:
         try:
             autor = album["artist_name"]
             unidades = int(album["unites_sold"])
             unidades_totais += unidades
-            albuns_por_autor.setdefault(autor, set()).add(album["album_title"])
-            unidades_por_autor[autor] = unidades_por_autor.get(autor, 0) + unidades
+            albuns_por_autor.setdefault(autor, set()).add(
+                album["album_title"]
+            )
+            unidades_por_autor[autor] = (
+                unidades_por_autor.get(autor, 0) + unidades
+            )
 
         except (KeyError, ValueError, TypeError):
             continue
@@ -157,12 +193,12 @@ def gerar_relatorio_financeiro(autenticado):
             nome = autor["artist_name"]
 
             # Converte a percentagem de str para número
-            percentagem = float(autor["rights_percentage"].replace("%", ""))
+            percent_raw = autor.get("rights_percentage", "0")
+            percentagem = float(percent_raw.replace("%", ""))
 
             # Receita usada como mock data para testes
             receita = float(autor["total_earned"])
 
-            
             num_albuns = len(albuns_por_autor.get(nome, set()))
             unidades = unidades_por_autor.get(nome, 0)
             albuns_totais += num_albuns
@@ -171,23 +207,34 @@ def gerar_relatorio_financeiro(autenticado):
             direitos = receita * (percentagem / 100)
             receita_total += receita
             total_global += direitos
-            def truncate(text, max_len=40):
-                text = str(text)
-                return text if len(text) <= max_len else text[:max_len-3] + "..."
-            dados.append({"Autor":truncate(nome, 40),
-                     "% Direitos":percentagem,
-                     "Nº Albuns":num_albuns,
-                     "Unid. Vendidas":unidades,
-                     "Receita (€)":f"{receita:.2f} €",
-                     "Direitos (€)":f"{direitos:.2f} €",})
+            dados.append({
+                "Autor": truncate(nome, 40),
+                "% Direitos": percentagem,
+                "Nº Albuns": num_albuns,
+                "Unid. Vendidas": unidades,
+                "Receita (€)": f"{receita:.2f} €",
+                "Direitos (€)": f"{direitos:.2f} €"
+            })
 
-        except (KeyError, ValueError, AttributeError):  # Ignora entradas inválidas
+        # Ignora entradas inválidas
+        except (KeyError, ValueError, AttributeError):
             continue
     dados.append({
-        "Autor":"TOTAL",
-        "% Direitos":"",
-        "Nº Albuns":albuns_totais,
-        "Unid. Vendidas":unidades_totais,
-        "Receita (€)":f"{receita_total:.2f} €",
-        "Direitos (€)":f"{total_global:.2f} €"})
-    print(tabulate(dados, headers="keys", tablefmt="rst", numalign="right", colalign="right", floatfmt=".2f"))
+        "Autor": "TOTAL",
+        "% Direitos": "",
+        "Nº Albuns": albuns_totais,
+        "Unid. Vendidas": unidades_totais,
+        "Receita (€)": f"{receita_total:.2f} €",
+        "Direitos (€)": f"{total_global:.2f} €"
+    })
+
+    print(
+        tabulate(
+            dados,
+            headers="keys",
+            tablefmt="rst",
+            numalign="right",
+            colalign="right",
+            floatfmt=".2f",
+        )
+    )

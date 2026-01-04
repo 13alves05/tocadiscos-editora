@@ -67,8 +67,8 @@ def main():
             while True:
                 escolha_menu_administrador = menu.menu_administrador()
                 if escolha_menu_administrador == "1":
-                    autor = { "artist_name": input("Autor: ")}
-                    reports.calcular_direitos_por_autor(autor)
+                    autor = input("Autor: ")
+                    reports.gerar_relatorio_autor(autor)
                     
                 elif escolha_menu_administrador == "2":
                     management.gerar_relatorio_financeiro(autorizado)
@@ -104,10 +104,6 @@ def main():
                 elif escolha_menu_player == "4":
                     audio.stop_music()
                     print("\nMúsica parada")
-
-                elif escolha_menu_player == "0":
-                    audio.stop_music()
-                    break
 
                 elif escolha_menu_player == "0":
                     break  # volta ao menu principal

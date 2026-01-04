@@ -46,13 +46,22 @@ def play_music(path):
         print("Não foi possível tocar a música.")
 
 def pause_music():
-    pygame.mixer.music.pause()
+    try:
+        pygame.mixer.music.pause()
+    except:
+        print("Não foi possível pausar.")
 
 def resume_music():
-    pygame.mixer.music.unpause()
+    try:
+        pygame.mixer.music.unpause()
+    except:
+        print("Não foi possível votlar a música.")
 
 def stop_music():
-    pygame.mixer.music.stop()
+    try:
+        pygame.mixer.music.stop()
+    except:
+        print("Não foi possível parar a música.")
 
 def is_playing():
     return pygame.mixer.music.get_busy()

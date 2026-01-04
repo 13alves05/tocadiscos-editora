@@ -7,7 +7,10 @@ from whoosh.index import create_in, open_dir, exists_in
 from whoosh.fields import Schema, TEXT, ID, STORED, KEYWORD
 from whoosh.qparser import MultifieldParser
 
-# Esquema unificado
+# Módulo de indexação unificada (Whoosh)
+# Comentários: este módulo cria um índice combinado de músicas, álbuns e autores
+# a partir dos CSV em data/ para acelerar pesquisas por texto.
+
 unified_schema = Schema(
     doc_type=KEYWORD(stored=True),
     doc_id=ID(stored=True, unique=True),
@@ -31,6 +34,7 @@ unified_schema = Schema(
 
 INDEX_DIR = "unified_music_index"
 
+
 def build_unified_index(
     tracks_file="data/raw_tracks.csv",
     albums_file="data/albums_table.csv",
@@ -50,6 +54,7 @@ def build_unified_index(
     total_docs = 0
 
     # =========================== Músicas ===========================
+    # Percorre o CSV de músicas e indexa cada entrada como documento do tipo 'track'.
     tracks_path = Path(tracks_file)
     if tracks_path.exists():
         try:
@@ -61,21 +66,22 @@ def build_unified_index(
                     reader.fieldnames = [name.strip() for name in reader.fieldnames]
                     for row in reader:
                         try:
-                            nationality = row.get('artist_nacionality', '') or row.get('artist_nacionality ', '')
-                            price = row.get('track_price', '') or row.get('track_price ', '')
+                            nationality = (row.get('artist_nacionality') or row.get('artist_nacionality ') or '')
+                            price = (row.get('track_price') or row.get('track_price ') or '')
 
                             writer.add_document(
                                 doc_type="track",
-                                doc_id=f"track_{row['track_id']}",
-                                title=row.get('track_title', ''),
-                                artist_name=row.get('artist_name', ''),
-                                genres=row.get('track_genres', ''),
+                                doc_id=f"track_{row.get('track_id', '')}",
+                                title=(row.get('track_title') or ''),
+                                artist_name=(row.get('artist_name') or ''),
+                                genres=(row.get('track_genres') or ''),
                                 nationality=nationality,
 
-                                album_title=row.get('album_title', ''),
-                                track_title=row.get('track_title', ''),
+                                album_title=(row.get('album_title') or ''),
+                                track_title=(row.get('track_title') or ''),
                                 track_price=price,
                             )
+
                             total_docs += 1
                         except Exception as e:
                             print(f"Erro ao indexar track {row.get('track_id')}: {e}")
@@ -86,6 +92,7 @@ def build_unified_index(
         print(f"Aviso: Ficheiro de tracks não encontrado: {tracks_file}")
 
     # =========================== Álbuns ===========================
+    # Indexa álbuns; campos numéricos/listas são mantidos como stored fields para relatórios
     albums_path = Path(albums_file)
     if albums_path.exists():
         try:
@@ -99,18 +106,19 @@ def build_unified_index(
                         try:
                             writer.add_document(
                                 doc_type="album",
-                                doc_id=f"album_{row['album_id']}",
-                                title=row.get('album_title', ''),
-                                artist_name=row.get('artist_name', ''),
-                                genres=row.get('album_genere', ''),
+                                doc_id=f"album_{row.get('album_id', '')}",
+                                title=(row.get('album_title') or ''),
+                                artist_name=(row.get('artist_name') or ''),
+                                genres=(row.get('album_genere') or ''),
                                 nationality='',
 
-                                album_title=row.get('album_title', ''),
-                                unites_sold=row.get('unites_sold', ''),
-                                album_price=row.get('album_price', ''),
-                                album_date=row.get('album_date', ''),
-                                track_list=row.get('tracks', ''),
+                                album_title=(row.get('album_title') or ''),
+                                unites_sold=(row.get('unites_sold') or ''),
+                                album_price=(row.get('album_price') or ''),
+                                album_date=(row.get('album_date') or ''),
+                                track_list=(row.get('tracks') or ''),
                             )
+
                             total_docs += 1
                         except Exception as e:
                             print(f"Erro ao indexar álbum {row.get('album_id')}: {e}")
@@ -121,6 +129,7 @@ def build_unified_index(
         print(f"Aviso: Ficheiro de álbuns não encontrado: {albums_file}")
 
     # =========================== Autores ===========================
+    # Indexa autores; guardo percentagens e lista de álbuns para pesquisa e reporting
     authors_path = Path(authors_file)
     if authors_path.exists():
         try:
@@ -134,16 +143,17 @@ def build_unified_index(
                         try:
                             writer.add_document(
                                 doc_type="artist",
-                                doc_id=f"artist_{row['author_id']}",
-                                title=row.get('artist_name', ''),
-                                artist_name=row.get('artist_name', ''),
+                                doc_id=f"artist_{row.get('author_id', '')}",
+                                title=(row.get('artist_name') or ''),
+                                artist_name=(row.get('artist_name') or ''),
                                 genres='',
-                                nationality=row.get('artist_nacionality', ''),
+                                nationality=(row.get('artist_nacionality') or ''),
 
-                                total_earned=row.get('total_earned', ''),
-                                rights_percentage=row.get('rights_percentage', ''),
-                                album_list=row.get('album_title', ''),
+                                total_earned=(row.get('total_earned') or ''),
+                                rights_percentage=(row.get('rights_percentage') or ''),
+                                album_list=(row.get('album_title') or ''),
                             )
+                            
                             total_docs += 1
                         except Exception as e:
                             print(f"Erro ao indexar autor {row.get('author_id')}: {e}")
@@ -155,7 +165,7 @@ def build_unified_index(
 
     # Finaliza o índice
     writer.commit()
-    print(f"\nÍndice construído com sucesso: {total_docs} documentos indexados.")
+    # print(f"\nÍndice construído com sucesso: {total_docs} documentos indexados.")
     print("Programa inicializado com sucesso\n")
 
 
