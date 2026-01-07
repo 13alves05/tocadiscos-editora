@@ -1,112 +1,207 @@
-# 🎵 Tocadiscos Editora
+# 🎵 Tocadiscos Editora — Sistema de Gestão Musical (CLI)
 
 **Projeto Académico – Gestão de Catálogo Musical**  
 **Unidade Curricular:** Algoritmos e Programação  
 **Curso:** Desenvolvimento de Software  
 **Ano Letivo:** 2025/2026  
 
-Aplicação em linha de comandos (CLI) desenvolvida para a editora musical fictícia **Tocadiscos**, com o objetivo de apoiar a gestão quotidiana de **autores, álbuns e músicas**, cálculo automático de **direitos editoriais**, pesquisa avançada, reprodução de áudio e controlo rigoroso de histórico de alterações.
+A **Tocadiscos Editora** é uma aplicação em linha de comandos (CLI) desenvolvida para gerir o catálogo musical de uma editora fictícia.  
+O sistema permite gerir **autores, álbuns e músicas**, calcular **direitos editoriais**, realizar **pesquisas avançadas**, reproduzir áudio e manter um **histórico completo de alterações** com possibilidade de reversão.
 
-Os dados são armazenados em ficheiros **CSV**, com base numa adaptação do dataset **Free Music Archive (FMA)**.
+Todos os dados são armazenados em ficheiros **CSV**, com validação rigorosa e pré‑processamento automático.
 
 ---
 
-## 🧑‍💻 Autoria
+# 🧑‍💻 Autoria
 
-Projeto desenvolvido por:  
+Projeto desenvolvido por:
+
 - **Bruno Oliveira**  
 - **Gabriela Tavares**  
 - **Leonardo Alves**  
-- **Vinicius Toniato**  
+- **Vinicius Toniato**
 
 ---
 
-## 📜 Enunciado do Trabalho Prático
+# 📜 Objetivo do Projeto
 
-O projeto segue fielmente o enunciado fornecido pela unidade curricular **Algoritmos e Programação** (2025/2026), cujos requisitos principais são:
+O projeto cumpre integralmente o enunciado da UC **Algoritmos e Programação**, incluindo:
 
-- Menu navegável em linha de comandos  
-- Listagem de autores com: Nome, Nacionalidade, Álbuns e Percentagem de direitos editoriais (**visível apenas após autenticação**)  
-- Listagem de álbuns por autor com: Nome, Género Musical, Data de Lançamento, Unidades Vendidas, Preço e Lista de músicas  
-- Armazenamento em ficheiros `.csv` (formato adaptável)  
-- Cálculo automático de direitos editoriais e apresentação em relatório tabular com ordenação, totais por autor e totais gerais (**acesso restrito**)  
-- Criação manual de novos autores (atualização dos ficheiros)  
-- Remoção de autores e respetivos álbuns  
-- Histórico de ações com possibilidade de reversão  
+- Menu navegável em CLI  
+- Gestão de autores, álbuns e músicas  
+- Cálculo de direitos editoriais  
+- Relatórios tabulares com totais  
 - Pesquisa por autor, álbum ou música  
-- Reprodução de ficheiros áudio digitais (sugestão: módulo `pygame.mixer`)
+- Reprodução de áudio  
+- Histórico de ações com reversão  
+- Armazenamento em `.csv`  
+- Acesso restrito a funcionalidades sensíveis  
 
 ---
 
-## ✅ Requisitos Cumpridos
+# 🚀 Visão Geral da Aplicação
 
-| Requisito do Enunciado                          | Implementação                                                                 |
-|-------------------------------------------------|-------------------------------------------------------------------------------|
-| Menu navegável em linha de comandos             | Menus hierárquicos claros (Principal → Pesquisa / Administrador / Player / Histórico) |
-| Listagem de autores com % direitos restrita     | `management.listar_autores(autenticado)` – coluna de direitos só visível após login |
-| Listagem detalhada de álbuns                    | Pesquisa por álbum mostra todas as informações exigidas                       |
-| Armazenamento em `.csv`                         | Três tabelas principais: `authors_table.csv`, `albums_table.csv`, `raw_tracks.csv` |
-| Relatório tabular com totais e acesso restrito  | Relatórios geral e por autor com `tabulate`, acesso condicionado a autenticação |
-| Criação manual de autores                       | Função `crud.adicionar_autor()`                                               |
-| Remoção de autor e álbuns                       | Função `crud.remover_autor()` com eliminação em cascata                       |
-| Histórico de ações com reversão                 | Módulo `history.py` – snapshots automáticos + desfazer última ação            |
-| Pesquisa por autor/álbum/música                 | Motor Whoosh (`searchEngine.py`) com pesquisa unificada                       |
-| Reprodução de áudio                             | Módulo `audio.py` usando `pygame.mixer`                                       |
+A aplicação está dividida em **quatro grandes áreas funcionais**:
+
+## 🔍 1. Pesquisa (Whoosh Search Engine)
+- Pesquisa rápida por **autor**, **álbum** ou **música**  
+- Indexação unificada de todos os CSV  
+- Resultados estruturados e filtrados por tipo  
+- Reconstrução automática do índice após alterações  
+
+## 🧑‍💼 2. Administração (Acesso Restrito)
+- Adicionar novos autores  
+- Remover autores (com eliminação em cascata de álbuns e músicas)  
+- Gerar relatório financeiro completo  
+- Gerar relatório individual por autor  
+
+## 🎧 3. Player de Áudio
+- Reproduzir músicas por título  
+- Pausar, retomar e parar  
+- Caminhos de áudio gerados automaticamente com base no `track_id`  
+
+## 🕒 4. Histórico e Snapshots
+- Cada alteração importante gera um snapshot automático  
+- Snapshots incluem cópia dos CSV + meta.json  
+- Possibilidade de reverter para qualquer estado anterior  
+- Função “Desfazer última ação” com confirmação  
 
 ---
 
-## ⭐ Funcionalidades Adicionais
+# 🧩 Arquitetura e Módulos
 
-- 🔍 **Pesquisa avançada e rápida** em todo o catálogo (Whoosh)  
-- 🎧 **Player completo** (iniciar, pausar, continuar, parar)  
-- 🕒 **Snapshots automáticos** em `data/history/` para todas as alterações importantes  
-- ↩️ **Desfazer última ação** com confirmação do utilizador  
-- ✔️ **Validação rigorosa** de dados com biblioteca `schema`  
-- 📊 **Relatórios formatados** em tabelas alinhadas (`tabulate`)  
-
----
-
-## 🗂️ Estrutura do Projeto
+A aplicação segue uma estrutura modular clara:
 
 ```
-tocadiscos-editora/
-├── data/
-│   ├── history/                 # Snapshots automáticos (criado em runtime)
-│   ├── songs/                   # Ficheiros de áudio .mp3 (organizados por ID)
-│   ├── admins.csv               # Credenciais de administradores
-│   ├── albums_table.csv         # Tabela de álbuns
-│   ├── authors_table.csv        # Tabela de autores
-│   └── raw_tracks.csv           # Tabela de músicas (dados brutos)
-├── src/
-│   ├── BaseDados/
-│   │   ├── fixDATA/             # Scripts auxiliares de pré-processamento
-│   │   │   ├── dataFormat.py
-│   │   │   ├── organizeData.py
-│   │   │   └── tracks_truncate_fix.py
-│   │   ├── dataSchema.py        # Validação de dados (schema)
-│   │   └── getAudioPath.py      # Construção de caminhos de áudio
-│   ├── audio.py                 # Reprodução de áudio (pygame)
-│   ├── crud.py                  # Operações CRUD + snapshots
-│   ├── history.py               # Gestão de histórico e reversão
-│   ├── main.py                  # Ponto de entrada da aplicação
-│   ├── management.py            # Carregamento de dados e autenticação
-│   ├── menu.py                  # Menus navegáveis
-│   ├── reports.py               # Relatórios financeiros
-│   └── searchEngine.py          # Indexação e pesquisa (Whoosh)
-├── requirements.txt
-├── LICENSE                      # MIT License (2025 Toca Discos Editora)
-├── Enunciado Trabalho Pratico.pdf
-├── Planeamento-pt-pt.txt
-└── README.md                    # Este ficheiro
+src/
+├── BaseDados/
+│   ├── fixDATA/              # Scripts de pré-processamento dos CSV
+│   ├── dataSchema.py         # Validação rigorosa com 'schema'
+│   └── getAudioPath.py       # Construção de caminhos de áudio
+├── audio.py                  # Player de áudio (pygame)
+├── crud.py                   # CRUD + snapshots + escrita/atualização dos CSV
+├── history.py                # Sistema de snapshots e reversão
+├── main.py                   # Ponto de entrada da aplicação
+├── management.py             # Autenticação e carregamento de dados
+├── menu.py                   # Menus navegáveis (CLI)
+├── reports.py                # Relatórios financeiros
+└── searchEngine.py           # Indexação e pesquisa (Whoosh)
 ```
 
 ---
 
-## 🧭 Funcionalidades da Aplicação
+# 🛠️ Funcionalidades Técnicas Implementadas
+
+## ✔️ Validação de Dados (schema)
+- Funções auxiliares para validar tipos, datas, listas, inteiros positivos, etc.  
+- Esquemas completos para autores, álbuns, músicas e administradores  
+- Evita dados mal formatados nos CSV  
+
+## ✔️ Pré‑processamento dos CSV
+Scripts em `fixDATA/` corrigem:
+- listas mal formatadas  
+- campos truncados  
+- inconsistências no dataset original  
+
+## ✔️ CRUD Completo
+- Adicionar autor  
+- Remover autor (com cascade delete)  
+- Atualizar percentagens de direitos  
+- Escrita segura dos CSV  
+
+## ✔️ Relatórios Financeiros
+- Totais por autor  
+- Totais globais  
+- Direitos editoriais calculados automaticamente  
+- Tabelas formatadas com `tabulate`  
+
+## ✔️ Pesquisa Avançada (Whoosh)
+- Indexação unificada de autores, álbuns e músicas  
+- Pesquisa por múltiplos campos  
+- Filtros por tipo de documento  
+- Resultados rápidos e consistentes  
+
+## ✔️ Player de Áudio
+- Baseado em `pygame.mixer`  
+- Caminhos automáticos para ficheiros `.mp3`  
+- Controlo completo: iniciar, pausar, retomar, parar  
+
+## ✔️ Histórico e Reversão
+- Snapshots automáticos em `data/history/`  
+- Cada snapshot contém:
+  - CSVs completos  
+  - meta.json com descrição e timestamp  
+- Reversão manual ou automática  
+
+---
+
+# 📂 Estrutura dos Dados
+
+### `authors_table.csv`
+- author_id  
+- artist_name  
+- artist_nacionality  
+- album_title (lista)  
+- rights_percentage  
+- total_earned  
+
+### `albums_table.csv`
+- album_id  
+- album_title  
+- artist_name  
+- album_genere  
+- album_date  
+- unites_sold  
+- album_price  
+- tracks (lista)  
+
+### `raw_tracks.csv`
+- track_id  
+- album_id  
+- track_title  
+- track_genres  
+- track_price  
+- artist_name  
+- artist_nacionality  
+- …  
+
+---
+
+# ▶️ Como Executar
+
+## 1. Requisitos
+- Python **3.13+**
+
+## 2. Instalar dependências
+```bash
+pip install -r requirements.txt
+```
+
+## 3. Preparar áudio (opcional)
+Criar estrutura:
+```
+data/songs/000/000001.mp3
+data/songs/000/000002.mp3
+...
+```
+
+## 4. Executar
+```bash
+python src/main.py
+```
+
+## 5. Login de Administrador
+```
+Utilizador: admin
+Senha: admin
+```
+
+---
+
+# 🧭 Menus da Aplicação
 
 ### Menu Principal
 ```
-=== EDITORA TOCADISCOS ===
 1 - Pesquisa
 2 - Administrador
 3 - Player
@@ -114,50 +209,23 @@ tocadiscos-editora/
 0 - Sair
 ```
 
-### Destaques
-- **Pesquisa**: Listagem de autores + pesquisa por autor, álbum ou música  
-- **Administrador** (acesso restrito): Relatórios financeiros, adicionar/remover autores  
-- **Player**: Reprodução de músicas por título  
-- **Histórico**: Ver snapshots e desfazer última ação  
+### Submenus
+- Pesquisa: autores, álbuns, músicas  
+- Administrador: relatórios, adicionar/remover autores  
+- Player: iniciar/pausar/retomar/parar  
+- Histórico: ver snapshots e desfazer última ação  
 
 ---
 
-## ▶️ Instruções de Execução
+# 📝 Notas Finais
 
-### 1. Requisitos
-- Python **3.13** ou superior
-
-### 2. Instalar dependências
-```bash
-pip install -r requirements.txt
-```
-(dependências: `pygame`, `tabulate`, `schema`, `whoosh`, `pandas`)
-
-### 3. Preparação de áudio (opcional – para testar o Player)
-- Criar a pasta `data/songs/`
-- Colocar ficheiros `.mp3` organizados por ID da faixa  
-  (exemplo: track_id 2 → `data/songs/000/000002.mp3`)
-- **Dica de teste rápido:** No menu Player → 1, escreva **Food** (música de exemplo do dataset)
-
-### 4. Executar a aplicação
-```bash
-python src/main.py
-```
-
-### 🔐 Credenciais de Administrador
-- Utilizador: `admin`
-- Senha: `admin`  
-(Outros utilizadores podem ser adicionados em `data/admins.csv`)
+- O projeto segue boas práticas de modularidade, validação, segurança e documentação.  
+- Todas as operações críticas são registadas e reversíveis.  
+- A pesquisa é rápida e escalável graças ao Whoosh.  
+- A aplicação é totalmente funcional em CLI, cumprindo todos os requisitos académicos.
 
 ---
 
-## 📝 Notas Finais
+# 🔗 Repositório GitHub
 
-- Todas as alterações importantes geram snapshots automáticos em `data/history/`.
-- O índice de pesquisa Whoosh é reconstruído automaticamente após modificações.
-- O projeto segue boas práticas de modularidade, validação de dados, segurança de acesso e documentação extensa.
-
-**Repositório GitHub:** https://github.com/13alves05/tocadiscos-editora
-
-**Obrigado**
-
+👉 https://github.com/13alves05/tocadiscos-editora
