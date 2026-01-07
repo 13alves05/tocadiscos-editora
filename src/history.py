@@ -21,10 +21,11 @@ import datetime
 import json
 from searchEngine import build_unified_index
 
-# Pasta onde ficam guardados todos os snapshots
+# Pasta onde ficam guardados todos os snapshots.
+# Cada snapshot é uma pasta com os CSV copiados e um ficheiro meta.json.
 HIST_DIR = "data/history"
 
-# Ficheiros que queremos guardar em cada snapshot
+# Lista dos ficheiros que queremos incluir em cada snapshot.
 FILES = [
     "data/authors_table.csv",
     "data/albums_table.csv",
@@ -33,34 +34,36 @@ FILES = [
 
 
 def _cria_pasta():
-    """Cria a pasta history se ainda não existir."""
+    """Garante que a pasta 'history' existe. Se não existir, cria-a."""
     os.makedirs(HIST_DIR, exist_ok=True)
 
 
 def salvar_snapshot(acao: str) -> str:
     """
-    Guarda um snapshot dos ficheiros CSV atuais.
-    
-    Parâmetro:
-        acao (str): descrição da operação realizada (ex: "Adicionado autor 'Madonna'")
-    
-    Retorna:
-        str: caminho da pasta do snapshot criado
+    Cria um snapshot completo do estado atual dos CSV.
+
+    - Gera uma pasta com timestamp + descrição da ação.
+    - Copia os ficheiros CSV para essa pasta.
+    - Cria um meta.json com informação sobre a ação e a data.
+
+    Retorna o caminho da pasta criada.
     """
     _cria_pasta()
-    
-    # Crio um nome único com data/hora + descrição da ação
+
+    # Criamos um timestamp único para identificar o snapshot.
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # Nome da pasta inclui timestamp + ação (com espaços substituídos por underscores).
     nome_pasta = f"{ts}_{acao.replace(' ', '_')}"
     pasta = os.path.join(HIST_DIR, nome_pasta)
     os.makedirs(pasta, exist_ok=True)
 
-    # Copio cada ficheiro CSV para a pasta do snapshot
+    # Copiamos cada ficheiro CSV para dentro da pasta do snapshot.
     for ficheiro in FILES:
         if os.path.exists(ficheiro):
             shutil.copy(ficheiro, pasta)
 
-    # Guardo metadados num ficheiro JSON (útil para mostrar no histórico)
+    # Guardamos metadados úteis para consulta posterior.
     meta = {
         "acao": acao,
         "data": ts
@@ -74,26 +77,34 @@ def salvar_snapshot(acao: str) -> str:
 
 def ver_historico():
     """
-    Lista todos os snapshots existentes.
-    
-    Retorna uma lista de dicionários com o nome da pasta e os metadados.
+    Lista todos os snapshots existentes na pasta 'history'.
+
+    Para cada snapshot:
+    - lê o meta.json (se existir)
+    - devolve nome + metadados
+
+    Retorna uma lista de dicionários.
     """
     _cria_pasta()
     snapshots = []
 
     for entrada in os.listdir(HIST_DIR):
         caminho = os.path.join(HIST_DIR, entrada)
+
+        # Só consideramos pastas (cada snapshot é uma pasta)
         if os.path.isdir(caminho):
             meta_path = os.path.join(caminho, "meta.json")
+
+            # Valores por defeito caso o meta.json esteja ausente ou corrompido
             meta = {"acao": "desconhecida", "data": "desconhecida"}
-            
+
             if os.path.exists(meta_path):
                 try:
                     with open(meta_path, "r", encoding="utf-8") as f:
                         meta = json.load(f)
                 except:
-                    pass  # se o JSON estiver corrompido, mantenho o padrão
-            
+                    pass  # Se o JSON estiver corrompido, usamos os valores padrão
+
             snapshots.append({"nome": entrada, "meta": meta})
 
     print(f"Encontrei {len(snapshots)} snapshot(s) no histórico.")
@@ -102,46 +113,46 @@ def ver_historico():
 
 def reverter_snapshot(nome: str) -> bool:
     """
-    Restaura os ficheiros CSV a partir de um snapshot específico.
-    
-    Parâmetro:
-        nome (str): nome da pasta do snapshot (ex: "20260104_123045_Adicionado_autor_Madonna")
-    
-    Retorna True se sucesso, False se o snapshot não existir.
+    Restaura o estado da aplicação para o snapshot indicado.
+
+    - Copia os CSV do snapshot de volta para a pasta data/
+    - Rebuilda o índice de pesquisa
+    - Retorna True se tudo correu bem
     """
     caminho_snapshot = os.path.join(HIST_DIR, nome)
-    
+
     if not os.path.isdir(caminho_snapshot):
         print("Snapshot não encontrado.")
         return False
 
-    # Copio os ficheiros do snapshot de volta para a pasta data/
+    # Copiamos os ficheiros do snapshot para a pasta original
     for ficheiro in FILES:
         origem = os.path.join(caminho_snapshot, os.path.basename(ficheiro))
         if os.path.exists(origem):
             shutil.copy(origem, ficheiro)
 
+    # Atualizamos o índice de pesquisa para refletir os dados revertidos
     build_unified_index()
+
     print(f"Estado revertido com sucesso para o snapshot: {nome}")
     return True
 
 
 def desfazer_ultima_acao() -> bool:
     """
-    Funcionalidade extra: reverte automaticamente a última alteração feita.
-    
-    Mostra a última ação realizada, pede confirmação ao utilizador e reverte se aceitar.
-    Muito útil para corrigir erros rapidamente.
-    
-    Retorna True se revertido com sucesso, False caso contrário.
+    Reverte automaticamente o snapshot mais recente.
+
+    - Mostra ao utilizador qual foi a última ação
+    - Pede confirmação
+    - Reverte se o utilizador aceitar
     """
     snapshots = ver_historico()
-    
+
     if not snapshots:
         print("Não há snapshots para reverter.")
         return False
 
-    # Ordeno pelo nome da pasta (o timestamp está no início → mais recente primeiro)
+    # Ordenamos por nome (timestamp no início -> mais recente primeiro)
     snapshots.sort(key=lambda x: x['nome'], reverse=True)
     ultimo = snapshots[0]
 
@@ -156,13 +167,14 @@ def desfazer_ultima_acao() -> bool:
         return False
 
     sucesso = reverter_snapshot(ultimo['nome'])
+
     if sucesso:
-        # É importante rebuildar o índice de pesquisa após reverter
+        # Rebuild do índice após reverter
         try:
             from searchEngine import build_unified_index
             build_unified_index()
             print("Índice de pesquisa atualizado.")
         except Exception as e:
             print(f"Aviso: não consegui rebuildar o índice: {e}")
-    
+
     return sucesso

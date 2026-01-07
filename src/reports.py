@@ -14,35 +14,48 @@ from crud import load_autores, load_albuns
 
 def calcular_direitos_por_autor(nome_autor: str):
     """
-    Calcula estatísticas de um autor: número de álbuns e unidades vendidas.
-    Também calcula receita total e direitos com base na percentagem do autor.
+    Calcula estatísticas financeiras de um autor específico.
+    Aqui reunimos:
+      - número de álbuns publicados
+      - unidades vendidas no total
+      - receita total (unidades * preço)
+      - direitos editoriais aplicando a percentagem do autor
+
+    Esta função é usada tanto no relatório geral como no individual.
     """
+
     nome_lower = nome_autor.lower()
 
+    # Filtra todos os álbuns pertencentes ao autor
     autor_albuns = [
         alb for alb in albuns.values()
         if alb.get("artist_name", "").lower() == nome_lower
     ]
 
+    # Número total de álbuns
     num_albuns = len(autor_albuns)
 
+    # Soma das unidades vendidas em todos os álbuns
     unidades_total = sum(
         int(alb.get("unites_sold", 0))
         for alb in autor_albuns
     )
 
+    # Receita total = unidades vendidas * preço do álbum
     receita_total = sum(
         int(alb.get("unites_sold", 0)) *
         float(alb.get("album_price", 0.0))
         for alb in autor_albuns
     )
 
+    # Procura a percentagem de direitos do autor
     autor_rights_percentage = 0
     for autor_data in autores.values():
         if autor_data['artist_name'].lower() == nome_autor.lower():
             autor_rights_percentage = autor_data["rights_percentage"]
             break
 
+    # Cálculo final dos direitos editoriais
     direitos_total = receita_total * (float(autor_rights_percentage) / 100)
 
     return {
@@ -55,24 +68,27 @@ def calcular_direitos_por_autor(nome_autor: str):
 
 def gerar_relatorio(ordenar_por="autor"):
     """
-    Gera relatório financeiro dos direitos editoriais para todos os autores.
-    Acesso restrito por palavra-passe.
-    """
+    Gera o relatório financeiro completo de todos os autores.
+    O relatório inclui:
+      - nº de álbuns
+      - unidades vendidas
+      - receita total
+      - direitos editoriais
 
-    # # Verificação de acesso
-    # if not management.realizar_login():
-    #     print("\nAcesso negado ao relatório. Palavra-passe incorreta.")
-    #     return ""
+    O acesso deveria ser restrito por palavra‑passe (já preparado no código).
+    """
 
     global autores, albuns
     autores = load_autores()
     albuns = load_albuns()
-    linhas = []
+
+    linhas = []          # linhas do relatório
     total_albuns = 0
     total_unidades = 0
     total_receita = 0.0
     total_direitos = 0.0
 
+    # Para cada autor, calcula os valores financeiros
     for autor_id, autor_data in autores.items():
         nome = autor_data.get("artist_name", "N/A").strip()
         percentagem = autor_data.get("rights_percentage", 0)
@@ -88,35 +104,37 @@ def gerar_relatorio(ordenar_por="autor"):
             f"{calc['direitos_total']:.2f}€"
         ])
 
+        # Acumula totais gerais
         total_albuns += calc["num_albuns"]
         total_unidades += calc["unidades_total"]
         total_receita += calc["receita_total"]
         total_direitos += calc["direitos_total"]
 
-    # Ordenação
+    # Ordenação do relatório
     if ordenar_por == "receita":
-        linhas.sort(
-            key=lambda x: float(x[4][:-1]),
-            reverse=True
-        )  # ordena por receita numérica
+        # Ordena pela receita numérica (removendo o símbolo €)
+        linhas.sort(key=lambda x: float(x[4][:-1]), reverse=True)
     else:
-        linhas.sort(key=lambda x: x[0])  # por nome
+        # Ordena alfabeticamente por nome
+        linhas.sort(key=lambda x: x[0])
 
-    # Impressão no estilo de listar_autores
+    # Impressão formatada (estilo semelhante ao listar_autores)
     print("\n" + "=" * 160)
 
     header = (
         f"{'AUTOR':<45} | {'% DIREITOS':<15} | {'Nº ÁLBUNS':<10} | "
         f"{'UNID. VENDIDAS':<15} | {'RECEITA (€)':<15} | {'DIREITOS (€)':<15}"
     )
-
     print(header)
     print("-" * 160)
 
     ultimo_autor = None
+
+    # Impressão das linhas do relatório
     for linha in linhas:
         nome = linha[0]
         mostrar_nome = nome if nome != ultimo_autor else ""
+
         formatted_line = (
             f"{mostrar_nome:<45} | {linha[1]:<15} | {linha[2]:<10} | "
             f"{linha[3]:<15} | {linha[4]:<15} | {linha[5]:<15}"
@@ -127,30 +145,33 @@ def gerar_relatorio(ordenar_por="autor"):
 
     print("-" * 160)
 
+    # Linha final com totais globais
     total_line = (
         f"{'TOTAL':<45} | {'':<15} | {total_albuns:<10} | "
         f"{total_unidades:<15} | {total_receita:.2f}€{'':<6} | "
         f"{total_direitos:.2f}€{'':<6}"
     )
-
     print(total_line)
     print("=" * 160)
 
-    return linhas  # retorna as linhas para uso posterior se necessário
+    return linhas
 
 
 def gerar_relatorio_autor(nome_autor: str):
     """
-    Gera relatório individual para um autor específico.
+    Gera um relatório individual para um autor específico.
+    Mostra:
+      - nº de álbuns
+      - unidades vendidas
+      - receita total
+      - direitos editoriais
     """
-    # if not management.realizar_login():
-    #     print("\nAcesso negado ao relatório. Palavra-passe incorreta.")
-    #     return ""
 
     global autores, albuns
     autores = load_autores()
     albuns = load_albuns()
 
+    # Procura o autor na base de dados
     autor_encontrado = None
     for autor_data in autores.values():
         if autor_data['artist_name'].lower() == nome_autor.lower():
@@ -164,14 +185,13 @@ def gerar_relatorio_autor(nome_autor: str):
     percentagem = f"{autor_encontrado['rights_percentage']:.1f}%"
     calc = calcular_direitos_por_autor(nome_autor)
 
-    # Impressão no estilo de listar_autores (individual)
+    # Impressão formatada (estilo igual ao relatório geral)
     print("\n" + "=" * 160)
 
     header = (
         f"{'AUTOR':<45} | {'% DIREITOS':<15} | {'Nº ÁLBUNS':<10} | "
         f"{'UNID. VENDIDAS':<15} | {'RECEITA (€)':<15} | {'DIREITOS (€)':<15}"
     )
-
     print(header)
     print("-" * 160)
 
