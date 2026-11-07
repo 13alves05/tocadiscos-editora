@@ -16,7 +16,7 @@ management.carregar_dados_sistema()
 
 
 def main():
-    # Loop principal da aplicação — mantém o programa a correr até o utilizador escolher sair.
+    # Loop principal da aplicação - mantém o programa a correr até o utilizador escolher sair.
     while True:
         escolha_menu_principal = menu.menu_principal()
 
