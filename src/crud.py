@@ -21,7 +21,7 @@ AUTHORS_FILE = Path("data/authors_table.csv")
 ALBUMS_FILE = Path("data/albums_table.csv")
 TRACKS_FILE = Path("data/raw_tracks.csv")
 
-# Headers usados ao gravar os ficheiros — garantem consistência na escrita
+# Headers usados ao gravar os ficheiros - garantem consistência na escrita
 AUTHORS_HEADER = [
     'author_id',
     'artist_name',
