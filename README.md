@@ -4,12 +4,16 @@ Projeto académico de grupo desenvolvido no âmbito da unidade curricular de Alg
 
 A aplicação é executada na linha de comandos (CLI) e permite gerir o catálogo de uma editora musical fictícia. O sistema trabalha com autores, álbuns e músicas, calcula direitos editoriais, disponibiliza pesquisa, permite reproduzir ficheiros de áudio e mantém um histórico de alterações com possibilidade de reversão.
 
-## Autoria
+## Autoria e colaboração
+
+Projeto desenvolvido por quatro elementos:
 
 - Bruno Oliveira
 - Gabriela Tavares
 - Leonardo Alves
 - Vinicius Toniato
+
+Leonardo Alves e Bruno Oliveira tiveram a participação mais expressiva no desenvolvimento. Gabriela Tavares e Vinicius Toniato também integraram o grupo e contribuíram para o trabalho.
 
 ## Funcionalidades
 
@@ -82,7 +86,7 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
-A reprodução de áudio depende da existência dos ficheiros de música no formato e na estrutura de pastas esperados pela aplicação. Esta funcionalidade pode ser utilizada sem ficheiros de áudio, mas não será possível reproduzir músicas.
+A reprodução de áudio depende da existência dos ficheiros de música no formato e na estrutura de pastas esperados pela aplicação. Sem esses ficheiros, as restantes funcionalidades podem ser exploradas, mas não será possível reproduzir músicas.
 
 ## Âmbito e estado
 
