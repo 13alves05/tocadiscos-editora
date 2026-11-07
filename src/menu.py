@@ -3,7 +3,7 @@ def menu_principal():
     opcoes_validas = {"1", "2", "3", "4", "0"}
 
     while True:
-        # Menu principal — ponto de entrada da aplicação
+        # Menu principal - ponto de entrada da aplicação
         print("\n" + "=" * 40)
         print("        EDITORA TOCADISCOS")
         print("=" * 40)
