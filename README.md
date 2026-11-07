@@ -88,9 +88,20 @@ python src/main.py
 
 A reprodução de áudio depende da existência dos ficheiros de música no formato e na estrutura de pastas esperados pela aplicação. Sem esses ficheiros, as restantes funcionalidades podem ser exploradas, mas não será possível reproduzir músicas.
 
+## Limitações e segurança
+
+Este projeto foi desenvolvido para fins académicos e não deve ser utilizado como sistema de gestão real ou exposto como serviço público.
+
+- O mecanismo de autenticação atual compara as palavras-passe diretamente com os valores guardados em `data/admins.csv`. Não utiliza hashing de palavras-passe.
+- O ficheiro de administradores faz parte do repositório. Não devem ser colocadas neste ficheiro credenciais reais nem palavras-passe reutilizadas noutros serviços.
+- A autenticação é simples e não substitui um sistema de gestão de utilizadores com armazenamento seguro de credenciais, controlo de sessões e registo de tentativas.
+- Não existe uma suite de testes automatizados no repositório. As funcionalidades devem ser verificadas manualmente.
+- As dependências de `requirements.txt` não têm versões fixas, pelo que a instalação pode produzir ambientes diferentes ao longo do tempo.
+- O histórico de alterações é baseado em cópias locais dos ficheiros CSV e não substitui uma estratégia de cópias de segurança testada.
+
 ## Âmbito e estado
 
-Este repositório documenta um projeto académico desenvolvido em grupo. A descrição das funcionalidades corresponde à estrutura e ao comportamento previstos no código do projeto; não constitui uma certificação de testes completos, segurança ou preparação para utilização em produção.
+Este repositório documenta um projeto académico desenvolvido em grupo. A descrição das funcionalidades corresponde à estrutura e ao comportamento identificados no código; não constitui uma certificação de testes completos, segurança ou preparação para utilização em produção.
 
 ## Repositório
 
