@@ -31,6 +31,10 @@ class AdminPasswordTests(unittest.TestCase):
         encoded = make_password_hash("password", iterations=1000)
         self.assertFalse(management.verificar_password("password", encoded))
 
+    def test_rejects_excessive_iterations(self):
+        encoded = make_password_hash("password", iterations=2_000_001)
+        self.assertFalse(management.verificar_password("password", encoded))
+
     def test_rejects_malformed_hash(self):
         self.assertFalse(management.verificar_password("password", "not-a-valid-hash"))
 
