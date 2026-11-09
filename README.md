@@ -80,11 +80,22 @@ src/
 pip install -r requirements.txt
 ```
 
-3. Executar a aplicação a partir da raiz do projeto:
+3. Criar o administrador local com o comando indicado na secção seguinte.
+4. Executar a aplicação a partir da raiz do projeto:
 
 ```bash
 python src/main.py
 ```
+
+### Criar utilizadores administradores
+
+Depois de instalar as dependências, cria o ficheiro local de administradores:
+
+```bash
+python src/setup_admins.py
+```
+
+O assistente pede o nome de utilizador e uma palavra-passe com pelo menos 12 caracteres. O ficheiro `data/admins.csv` é criado apenas na máquina local e está excluído do Git. Para uma instalação nova, este passo é necessário antes de utilizar as opções protegidas por autenticação.
 
 A reprodução de áudio depende da existência dos ficheiros de música no formato e na estrutura de pastas esperados pela aplicação. Sem esses ficheiros, as restantes funcionalidades podem ser exploradas, mas não será possível reproduzir músicas.
 
@@ -92,9 +103,10 @@ A reprodução de áudio depende da existência dos ficheiros de música no form
 
 Este projeto foi desenvolvido para fins académicos e não deve ser utilizado como sistema de gestão real ou exposto como serviço público.
 
-- O mecanismo de autenticação atual compara as palavras-passe diretamente com os valores guardados em `data/admins.csv`. Não utiliza hashing de palavras-passe.
-- O ficheiro de administradores faz parte do repositório. Não devem ser colocadas neste ficheiro credenciais reais nem palavras-passe reutilizadas noutros serviços.
-- A autenticação é simples e não substitui um sistema de gestão de utilizadores com armazenamento seguro de credenciais, controlo de sessões e registo de tentativas.
+- As palavras-passe dos administradores são verificadas através de PBKDF2-HMAC-SHA256 com salt individual e 260 000 iterações.
+- As credenciais locais são guardadas em `data/admins.csv`, ficheiro excluído do Git. O repositório não deve conter palavras-passe, hashes de produção ou credenciais pessoais.
+- As credenciais que constavam de versões anteriores do repositório foram publicadas no histórico Git. Devem ser consideradas comprometidas e substituídas; remover o ficheiro da versão atual não apaga os commits antigos.
+- A autenticação continua a ser uma implementação académica simples e não substitui um sistema de gestão de utilizadores com controlo de sessões, limitação de tentativas e auditoria.
 - Não existe uma suite de testes automatizados no repositório. As funcionalidades devem ser verificadas manualmente.
 - As dependências de `requirements.txt` não têm versões fixas, pelo que a instalação pode produzir ambientes diferentes ao longo do tempo.
 - O histórico de alterações é baseado em cópias locais dos ficheiros CSV e não substitui uma estratégia de cópias de segurança testada.
