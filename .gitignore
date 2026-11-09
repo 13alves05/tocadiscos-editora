@@ -23,3 +23,6 @@ unified_music_index
 *.suo
 *.swn
 *.swp
+
+# Credenciais locais de administradores (nunca versionar)
+data/admins.csv

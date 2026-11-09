@@ -1,5 +1,8 @@
 import csv
 import ast
+import hashlib
+import hmac
+import getpass
 from tabulate import tabulate
 
 # Estas listas funcionam como "cache" em memória.
@@ -41,6 +44,27 @@ def carregar_dados_sistema():
         print(f"Erro: ficheiro {e.filename} não encontrado.")
 
 
+def verificar_password(password, password_hash):
+    """Valida uma palavra-passe PBKDF2 armazenada no formato algoritmo$iteracoes$salt$hash."""
+    try:
+        algorithm, iterations_raw, salt_hex, expected_hash = password_hash.split("$", 3)
+        if algorithm != "pbkdf2_sha256":
+            return False
+        iterations = int(iterations_raw)
+        if not 260000 <= iterations <= 2000000:
+            return False
+        salt = bytes.fromhex(salt_hex)
+        digest = bytes.fromhex(expected_hash)
+        if len(salt) != 16 or len(digest) != 32:
+            return False
+        calculated = hashlib.pbkdf2_hmac(
+            "sha256", password.encode("utf-8"), salt, iterations
+        )
+        return hmac.compare_digest(calculated, digest)
+    except (AttributeError, TypeError, ValueError):
+        return False
+
+
 def realizar_login():
     """
     Verifica as credenciais introduzidas pelo utilizador.
@@ -48,10 +72,10 @@ def realizar_login():
     """
     print("\n--- ACESSO RESTRITO ---")
     username = input("Utilizador: ")
-    password = input("Senha: ")
+    password = getpass.getpass("Senha: ")
 
     for admin in lista_admins:
-        if admin["username"] == username and admin["password"] == password:
+        if admin["username"] == username and verificar_password(password, admin.get("password_hash", "")):
             print("Acesso autorizado.")
             return True
 
