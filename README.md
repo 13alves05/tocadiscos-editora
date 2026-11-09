@@ -80,22 +80,19 @@ src/
 pip install -r requirements.txt
 ```
 
-3. Criar o administrador local com o comando indicado na secção seguinte.
-4. Executar a aplicação a partir da raiz do projeto:
-
-```bash
-python src/main.py
-```
-
-### Criar utilizadores administradores
-
-Depois de instalar as dependências, cria o ficheiro local de administradores:
+3. Criar o administrador local:
 
 ```bash
 python src/setup_admins.py
 ```
 
-O assistente pede o nome de utilizador e uma palavra-passe com pelo menos 12 caracteres. O ficheiro `data/admins.csv` é criado apenas na máquina local e está excluído do Git. Para uma instalação nova, este passo é necessário antes de utilizar as opções protegidas por autenticação.
+O assistente cria `data/admins.csv` na máquina local e guarda apenas hashes PBKDF2. O ficheiro está excluído do Git. Usa palavras-passe únicas com pelo menos 12 caracteres. Este passo é necessário antes de executar a aplicação numa instalação nova.
+
+4. Executar a aplicação a partir da raiz do projeto:
+
+```bash
+python src/main.py
+```
 
 A reprodução de áudio depende da existência dos ficheiros de música no formato e na estrutura de pastas esperados pela aplicação. Sem esses ficheiros, as restantes funcionalidades podem ser exploradas, mas não será possível reproduzir músicas.
 
