@@ -19,6 +19,7 @@ import os
 import shutil
 import datetime
 import json
+from pathlib import Path
 from searchEngine import build_unified_index
 
 # Pasta onde ficam guardados todos os snapshots.
@@ -113,25 +114,36 @@ def ver_historico():
 
 def reverter_snapshot(nome: str) -> bool:
     """
-    Restaura o estado da aplicação para o snapshot indicado.
+    Restaura um snapshot válido, limitado à pasta data/history.
 
-    - Copia os CSV do snapshot de volta para a pasta data/
-    - Rebuilda o índice de pesquisa
-    - Retorna True se tudo correu bem
+    Rejeita caminhos absolutos, traversal, symlinks externos e snapshots
+    incompletos antes de substituir qualquer ficheiro de dados.
     """
-    caminho_snapshot = os.path.join(HIST_DIR, nome)
-
-    if not os.path.isdir(caminho_snapshot):
-        print("Snapshot não encontrado.")
+    if not nome or nome in (".", "..") or "/" in nome or "\\" in nome:
+        print("Nome de snapshot inválido.")
         return False
 
-    # Copiamos os ficheiros do snapshot para a pasta original
-    for ficheiro in FILES:
-        origem = os.path.join(caminho_snapshot, os.path.basename(ficheiro))
-        if os.path.exists(origem):
-            shutil.copy(origem, ficheiro)
+    history_root = Path(HIST_DIR).resolve()
+    caminho_snapshot = (history_root / nome).resolve()
 
-    # Atualizamos o índice de pesquisa para refletir os dados revertidos
+    if caminho_snapshot.parent != history_root or not caminho_snapshot.is_dir():
+        print("Snapshot não encontrado ou caminho inválido.")
+        return False
+
+    ficheiros_snapshot = [
+        (Path(ficheiro), caminho_snapshot / Path(ficheiro).name)
+        for ficheiro in FILES
+    ]
+
+    # Validar o snapshot completo antes de alterar qualquer dado atual.
+    if any(not origem.is_file() for _, origem in ficheiros_snapshot):
+        print("Snapshot incompleto. Nenhum ficheiro foi alterado.")
+        return False
+
+    for destino, origem in ficheiros_snapshot:
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(origem, destino)
+
     build_unified_index()
 
     print(f"Estado revertido com sucesso para o snapshot: {nome}")
