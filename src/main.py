@@ -145,6 +145,11 @@ def main():
 
         # ===================== MENU HISTÓRICO / SNAPSHOTS =====================
         elif escolha_menu_principal == "4":
+            autorizado = management.realizar_login()
+            if not autorizado:
+                print("\nAcesso negado ao histórico.")
+                continue
+
             while True:
                 escolha_menu_historico = menu.menu_historico()
 
