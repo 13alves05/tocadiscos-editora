@@ -110,9 +110,9 @@ Este projeto foi desenvolvido para fins académicos e não deve ser utilizado co
 - As credenciais locais são guardadas em `data/admins.csv`, ficheiro excluído do Git. O repositório não deve conter palavras-passe, hashes de produção ou credenciais pessoais.
 - As credenciais que constavam de versões anteriores do repositório foram publicadas no histórico Git. Devem ser consideradas comprometidas e substituídas; remover o ficheiro da versão atual não apaga os commits antigos.
 - A autenticação continua a ser uma implementação académica simples e não substitui um sistema de gestão de utilizadores com controlo de sessões, limitação de tentativas e auditoria.
-- Existe uma suite inicial de testes automatizados para a verificação das palavras-passe e validação sintática do código. As restantes funcionalidades continuam a necessitar de testes manuais.
+- A suite automatizada inclui testes de verificação de palavras-passe e de segurança da reposição de snapshots (travessia de diretórios, snapshots incompletos e reposição válida), além da compilação sintática do código. As restantes funcionalidades continuam a necessitar de testes manuais.
 - As dependências de `requirements.txt` não têm versões fixas, pelo que a instalação pode produzir ambientes diferentes ao longo do tempo.
-- O histórico de alterações é baseado em cópias locais dos ficheiros CSV e não substitui uma estratégia de cópias de segurança testada.
+- O histórico só pode ser consultado e revertido depois de autenticação de administrador. A reposição rejeita caminhos fora de `data/history` e snapshots incompletos; continua a ser baseado em cópias locais dos CSV e não substitui uma estratégia de cópias de segurança testada.
 
 ## Âmbito e estado
 
